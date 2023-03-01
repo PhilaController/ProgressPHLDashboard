@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.btn-default {
+  @apply tw-min-w-[100px] tw-rounded tw-border-[1px] tw-border-solid tw-px-3 tw-py-3 tw-text-center tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[2px] sm:tw-w-fit sm:tw-border-[2px] sm:tw-text-sm md:tw-px-6 md:tw-py-3 md:tw-text-base;
+}
+
+.btn-default-wide {
+  @apply tw-w-fit tw-min-w-[200px] tw-rounded tw-border-[2px] tw-border-solid tw-px-3 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[2px] sm:tw-text-sm md:tw-min-w-[100px] md:tw-px-6 md:tw-py-3 md:tw-text-base;
+}
+
+.btn-default-colors-bw {
+  @apply tw-border-stone-500 tw-bg-stone-100 tw-text-stone-500 tw-transition-all tw-delay-100 tw-ease-in-out hover:tw-cursor-pointer hover:tw-bg-stone-300 focus:tw-bg-stone-300  focus:tw-outline focus:tw-outline-2 focus:tw-outline-offset-2 focus:tw-outline-stone-300;
+}
+
+.btn-default-colors {
+  @apply tw-border-[#0F7582] tw-bg-[#D6F0F2] tw-text-zinc-800 tw-transition-all tw-delay-100 tw-ease-in-out hover:tw-cursor-pointer hover:tw-bg-[#0F7582] hover:tw-text-white focus:tw-bg-[#0F7582] focus:tw-text-white focus:tw-outline focus:tw-outline-2 focus:tw-outline-offset-2 focus:tw-outline-[#0F7582];
+}
+
+@layer base {
+  /* In reality, such a general selector is probably
+     a bad idea! But this is just an example… */
+  button[aria-expanded="true"] + * {
+    display: block;
+  }
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-size: 2.125rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
