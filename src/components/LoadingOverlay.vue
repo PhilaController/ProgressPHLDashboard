@@ -1,6 +1,6 @@
 <template>
   <div
-    class="tw-absolute tw-top-0 tw-left-0 tw-z-[8] tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-transparent tw-bg-opacity-50"
+    class="tw-absolute tw-top-0 tw-left-0 tw-z-[7] tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-white tw-bg-opacity-75"
   >
     <div class="loader"></div>
   </div>
@@ -18,7 +18,7 @@ export default {
 .loader {
   width: 48px;
   height: 48px;
-  border: 5px solid #fff;
+  border: 5px solid #e5e7eb;
   border-bottom-color: #0f7582;
   border-radius: 50%;
   display: inline-block;

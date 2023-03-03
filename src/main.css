@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+footer {
+  display: none !important;
+}
+
 .btn-default {
   @apply tw-min-w-[100px] tw-rounded tw-border-[1px] tw-border-solid tw-px-3 tw-py-3 tw-text-center tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[2px] sm:tw-w-fit sm:tw-border-[2px] sm:tw-text-sm md:tw-px-6 md:tw-py-3 md:tw-text-base;
 }

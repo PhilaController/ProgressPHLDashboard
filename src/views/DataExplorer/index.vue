@@ -38,7 +38,7 @@
 
       <!-- Content -->
       <div
-        class="tw-w-full tw-overflow-y-scroll tw-border-b-4 tw-border-stone-400/50 tw-pb-10 lg:tw-w-2/3"
+        class="tw-w-full lg:tw-overflow-y-scroll tw-border-b-4 tw-border-stone-400/50 tw-pb-10 lg:tw-w-2/3"
         id="content-container"
       >
         <!-- Welcome Pane: No neighborhood selection  -->

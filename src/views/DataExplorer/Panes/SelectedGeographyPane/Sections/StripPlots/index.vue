@@ -16,8 +16,12 @@
           class="tw-mx-[1px] tw-h-full tw-flex-grow tw-border tw-border-cyan-500 tw-bg-cyan-300"
         ></div>
       </div>
-      <div class="tw-ml-2 tw-text-2xl tw-font-bold tw-leading-none">
-        SPI Scores Across Philadelphia
+      <div class="tw-ml-2 tw-text-2xl tw-font-bold">
+        {{
+          $mq === "mobile"
+            ? "The Philadelphia SPI"
+            : "Philadelphia Social Progress Scores"
+        }}
       </div>
     </div>
 

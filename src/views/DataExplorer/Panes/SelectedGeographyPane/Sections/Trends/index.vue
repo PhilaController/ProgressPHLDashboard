@@ -1,7 +1,9 @@
 <template>
-  <div class="tw-flex tw-h-[1000px] tw-w-full tw-flex-col">
+  <div class="tw-flex tw-w-full tw-flex-col">
     <!-- Section title -->
-    <div class="tw-flex tw-items-end tw-border-b tw-border-stone-300 tw-pb-1">
+    <div
+      class="tw-flex tw-items-end tw-border-b tw-border-stone-300 tw-px-4 tw-pb-1 sm:tw-px-0"
+    >
       <!-- Custom logo -->
       <div class="tw-mr-1.5 tw-h-8 tw-w-8 tw-pt-1">
         <svg
@@ -20,31 +22,36 @@
           <circle cx="169.34" cy="113.5" r="13.17" />
         </svg>
       </div>
-      <div class="tw-ml-2 tw-text-2xl tw-font-bold">SPI Correlations</div>
+      <div class="tw-ml-2 tw-text-2xl tw-font-bold">
+        {{
+          $mq === "mobile"
+            ? "SPI vs. Economic Data"
+            : "Comparing Social Progress and Economic Status"
+        }}
+      </div>
     </div>
 
     <!-- Intro text -->
-    <div class="tw-mt-3 tw-text-sm">
+    <div class="tw-mt-3 tw-px-4 tw-text-sm sm:tw-px-0">
       <p>
         This section shows how the Philadelphia SPI compares to three
         traditional economic indicators: household income, poverty rate, and
-        unemployment rate. Although the Philadelphia SPI is designed to measure
-        quality of life independent of economic data, comparisons to typical
-        economic indicators provide insight into how neighborhoods fare at
-        turning their economic status into improved social outcomes.
+        unemployment rate. These comparisons provide insight into how
+        neighborhoods fare at turning their economic status into improved social
+        outcomes.
       </p>
 
-      <div class="tw-font-base tw-mt-6 tw-font-semibold tw-underline">
-        What the chart shows
-      </div>
-      <p class="tw-mt-1">
+      <p class="tw-mt-3">
         The chart below includes one circle for each of the city's 372 populated
         neighborhood tracts, with the y-axis showing each tract's SPI score and
-        the x-axis showing the value of each tract's comparison indicator. Use
-        the dropdowns to choose which indicators are shown on the chart and
-        explore how the relationship between the variables changes.
+        the x-axis showing the value of each tract's economic indicator. A good
+        exercise is to identify tracts with similar economic indicators (on the
+        x-axis) and compare their SPI scores (on the y-axis) to identify those
+        tracts that have been able to overperform and achieve higher levels of
+        social progress than others.
       </p>
-      <p class="tw-mt-4">
+
+      <p class="tw-mt-3">
         <template v-if="selectedGeographyType == 'tract'">
           The score for the
           <span class="tw-font-medium">{{ selectedGeographyName }}</span>
@@ -62,29 +69,17 @@
           over and click on a specific circle in the chart.
         </template>
       </p>
-      <p class="tw-mt-4">
-        A good exercise is to identify tracts with similar
-        <span class="tw-font-medium"
-          >{{
-            comparisonAliases[selectedComparisonVariable].toLowerCase()
-          }}
-          values (on the x-axis)</span
-        >
-        and compare their
-        <span class="tw-font-medium">SPI scores (on the y-axis)</span> to
-        identify those tracts that have been able to overperform and achieve
-        higher levels of social progress than others.
-      </p>
     </div>
 
-    <div class="tw-mt-10">
+    <!-- Chart options -->
+    <div class="tw-mt-10 tw-px-4 sm:tw-px-0">
       <!-- Title -->
       <div class="tw-pb-2 tw-text-base tw-font-semibold">Chart Options</div>
 
-      <div class="tw-flex tw-w-full tw-flex-row tw-gap-10">
+      <div class="tw-flex tw-w-full tw-flex-col tw-gap-10 md:tw-flex-row">
         <!-- X/Y dropdowns -->
         <div
-          class="tw-max-w-1/2 tw-flex tw-flex-grow tw-flex-col tw-justify-evenly"
+          class="tw-flex tw-w-full tw-flex-grow tw-flex-col tw-justify-start md:tw-w-1/2"
         >
           <!-- x-axis dropdown  -->
           <div class="tw-max-w-[400px]">
@@ -92,7 +87,7 @@
               for="dropdown-x-axis"
               class="tw-mb-1 tw-text-xs tw-italic tw-text-neutral-500"
             >
-              Select the variable on the x-axis
+              Select the economic variable on the x-axis
             </div>
             <dropdown
               id="dropdown-x-axis"
@@ -112,7 +107,7 @@
               for="dropdown-y-axis"
               class="tw-mb-1 tw-text-xs tw-italic tw-text-neutral-500"
             >
-              Select the variable on the y-axis
+              Select the SPI variable on the y-axis
             </div>
             <dropdown
               id="dropdown-y-axis"
@@ -131,20 +126,34 @@
         </div>
 
         <!-- Demographic Filter -->
-        <div class="tw-max-w-1/2 tw-flex tw-flex-grow tw-flex-col">
+        <div class="tw-flex tw-w-full tw-flex-grow tw-flex-col md:tw-w-1/2">
           <div class="tw-max-w-[400px]">
             <div
-              role="label"
-              for="dropdown-demographic-cut"
-              class="tw-mb-0.5 tw-text-xs tw-italic tw-text-neutral-500"
+              class="tw-mb-2 tw-flex tw-justify-between tw-text-xs tw-text-neutral-500"
             >
-              Filter visible tracts by a specific demographic variable
+              <div
+                role="label"
+                for="dropdown-demographic-cut"
+                class="tw-italic"
+              >
+                Filter visible tracts by a specific demographic variable
+              </div>
+              <div
+                class="hover:tw-cursor-point tw-leading tw-rounded tw-border tw-border-neutral-500 tw-bg-neutral-100/50 tw-py-1 tw-px-1.5 tw-text-xs tw-uppercase hover:tw-bg-neutral-200/50"
+                :class="{
+                  disabled:
+                    !selectedDemographicVariable && !demographicCutoffValue,
+                }"
+                role="button"
+                @click.prevent="handleDemographicReset"
+              >
+                Reset
+              </div>
             </div>
             <dropdown
               id="dropdown-demographic-cut"
               class="tw-text-sm"
               v-model="selectedDemographicVariable"
-              :clearable="true"
               placeholder="Select a demographic variable"
               :options="
                 demographicVariables.map((d) => {
@@ -154,36 +163,32 @@
             />
           </div>
           <input-button
+            ref="demographicFilterInput"
             class="tw-mt-2.5 tw-max-w-[400px]"
-            placeholder="Cutoff value, e.g. 50%"
+            placeholder="Cutoff value, e.g. population >50%"
             @input="demographicCutoffValue = $event"
           />
-          <!-- <div class="tw-mt-2.5 tw-flex tw-flex-row tw-gap-2">
-            <div
-              class="tw-border-2 tw-border-neutral-600 tw-bg-white tw-p-1 tw-text-sm hover:tw-cursor-pointer hover:tw-bg-neutral-600 hover:tw-text-white focus:tw-outline-none"
-              role="button"
-              :class="{ disabled: demographicButtonDisabled }"
-              :tabindex="demographicButtonDisabled ? -1 : 0"
-              @click="handleDemographicFilterSubmit"
+
+          <div
+            class="tw-mt-2 tw-min-h-[75px] tw-max-w-[400px] tw-text-xs tw-italic"
+          >
+            <template v-if="hiddenIds.length > 0 && selectedData">
+              Currently showing {{ visibleTracts }} out of
+              {{ selectedData.length }} tracts where
+              {{ comparisonAliases[selectedDemographicVariable] }} residents
+              represent at least {{ demographicCutoffValue }}% of the population
+            </template>
+            <template v-else-if="selectedData"
+              >Currently showing all {{ selectedData.length }} tracts</template
             >
-              Filter
-            </div>
-            <div
-              class="tw-border-2 tw-border-neutral-600 tw-bg-white tw-p-1 tw-text-sm hover:tw-cursor-pointer hover:tw-bg-neutral-600 hover:tw-text-white focus:tw-outline-none"
-              :class="{
-                disabled: !isDemographicFilter,
-              }"
-              role="button"
-              @click="resetDemographicFilter"
-            >
-              Reset Filter
-            </div>
-          </div> -->
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="tw-mt-10 tw-flex tw-w-full tw-justify-start">
+    <div
+      class="tw-relative tw-mt-4 tw-flex tw-w-full tw-justify-start tw-px-0 sm:tw-px-0"
+    >
       <scatter-chart
         v-if="selectedData"
         :height="550"
@@ -199,11 +204,13 @@
         @mouseover="$emit('geography:hover', $event)"
         @mouseleave="$emit('geography:unhover')"
       />
+      <div v-else class="tw-min-h-[600px]"></div>
     </div>
   </div>
 </template>
 
 <script>
+import LoadingOverlay from "@/components/LoadingOverlay";
 import Dropdown from "@/components/Dropdown";
 import ScatterChart from "./ScatterChart";
 import InputButton from "./InputButton";
@@ -222,7 +229,7 @@ export default {
     "selectedGeographyType",
     "focusedIds",
   ],
-  components: { ScatterChart, Dropdown, InputButton },
+  components: { ScatterChart, Dropdown, InputButton, LoadingOverlay },
   data() {
     return {
       /**
@@ -265,6 +272,13 @@ export default {
       dataCache: {},
       comparisonData: null,
       demographicData: null,
+
+      /**
+       * Is the chart ready?
+       */
+      chartReady: false,
+
+      error: "",
     };
   },
 
@@ -275,20 +289,39 @@ export default {
   },
 
   watch: {
-    selectedComparisonVariable(newValue) {
-      this.setComparisonData(newValue);
+    /**
+     * When selected comparison variable changes, pull new data
+     */
+    selectedComparisonVariable(value) {
+      // Chart isn't ready
+      this.chartReady = false;
+
+      // Fetch
+      this.fetchData(value).then((data) => {
+        this.dataCache[value] = this.comparisonData = data;
+        this.chartReady = true;
+      });
     },
-    selectedDemographicVariable(newValue) {
-      this.setDemographicData(newValue);
+
+    /**
+     * Get the selected demographic data when value changes
+     */
+    selectedDemographicVariable(value) {
+      if (value) {
+        // Chart isn't ready
+        this.chartReady = false;
+
+        // Fetch
+        this.fetchData(value).then((data) => {
+          this.dataCache[value] = this.demographicData = data;
+          this.chartReady = true;
+        });
+      } else {
+        this.demographicData = null;
+      }
     },
   },
   computed: {
-    demographicButtonDisabled() {
-      return (
-        this.selectedDemographicVariable === null ||
-        this.demographicCutoffValue === null
-      );
-    },
     tickFormatter() {
       // Format $
       if (this.selectedComparisonVariable === "median_household_income")
@@ -307,6 +340,10 @@ export default {
       else if (this.selectedComparisonVariable === "unemployment_rate")
         return this.getPercentFormatter(1);
     },
+
+    /**
+     * Selected SPI data
+     */
     selectedSPIData() {
       if (this.selectedSPIVariable) return this.data[this.selectedSPIVariable];
     },
@@ -345,12 +382,22 @@ export default {
       });
     },
 
+    visibleTracts() {
+      if (this.selectedData) {
+        if (this.hiddenIds.length === 0) return this.selectedData.length;
+        else
+          return this.selectedData.filter(
+            (d) => !this.hiddenIds.includes(d.geoid)
+          ).length;
+      }
+    },
+
     hiddenIds() {
-      if (!this.selectedData) return [];
+      if (!this.selectedData || !this.demographicData) return [];
       if (!this.demographicCutoffValue || !this.selectedDemographicVariable)
         return [];
 
-      let data = this.dataCache[this.selectedDemographicVariable];
+      let data = this.demographicData;
       return data
         .filter((d) => d.estimate < this.demographicCutoffValue / 100)
         .map((d) => d.geoid);
@@ -375,6 +422,10 @@ export default {
     },
   },
   methods: {
+    handleDemographicReset() {
+      this.$refs.demographicFilterInput.handleClear();
+      this.selectedDemographicVariable = null;
+    },
     getDropdownIndent(d) {
       if (d == "social_progress_index") return "";
       else if (this.metadata.hierarchy["social_progress_index"].includes(d))
@@ -387,45 +438,13 @@ export default {
     getPercentFormatter(decimals) {
       return (d) => format(`,.${decimals}f`)(d * 100) + "%";
     },
+
     /**
-     * Get the comparison data
+     * Fetch data from s3
      */
-    setComparisonData(value) {
-      if (value !== null) {
-        // Get the data from the cache
-        let data = this.dataCache[value];
-
-        // Pull the data if we need to
-        if (!data) {
-          const url = `${SPI_URL}/${value}.json`;
-          json(url).then((data) => {
-            this.dataCache[value] = this.comparisonData = data;
-          });
-        }
-        // Or use the cached data
-        else {
-          this.comparisonData = data;
-        }
-      }
-    },
-
-    setDemographicData(value) {
-      if (value !== null) {
-        // Get the data from the cache
-        let data = this.dataCache[value];
-
-        // Pull the data if we need to
-        if (!data) {
-          const url = `${SPI_URL}/${value}.json`;
-          json(url).then((data) => {
-            this.dataCache[value] = this.demographicData = data;
-          });
-        }
-        // Or use the cached data
-        else {
-          this.demographicData = data;
-        }
-      }
+    fetchData(tag) {
+      const url = `${SPI_URL}/${tag}.json`;
+      return json(url);
     },
   },
 };
@@ -433,6 +452,6 @@ export default {
 
 <style scoped>
 .disabled {
-  @apply tw-cursor-not-allowed tw-opacity-50 hover:tw-border-neutral-600 hover:tw-bg-white hover:tw-text-inherit !important;
+  @apply tw-cursor-not-allowed tw-opacity-25 hover:tw-bg-neutral-100/50  !important;
 }
 </style>

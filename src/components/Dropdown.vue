@@ -228,6 +228,9 @@ export default {
             break;
           }
         }
+      } else {
+        this.selectedMenuitem = null;
+        this.selectedOptionLabel = null;
       }
     },
   },

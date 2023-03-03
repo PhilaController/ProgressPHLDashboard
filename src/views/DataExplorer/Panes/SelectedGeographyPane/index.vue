@@ -17,9 +17,10 @@
     />
 
     <!-- Sections -->
-    <div class="tw-mt-10 tw-px-4 sm:tw-px-8">
+    <div class="tw-mt-10">
       <!-- Top Summary Message -->
       <top-message
+        class="tw-px-4 sm:tw-px-8"
         :selected-geography-name="selectedGeographyName"
         :selected-geography-type="selectedGeographyType"
         :spi-data="data['social_progress_index']"
@@ -28,7 +29,7 @@
       <!-- Indicators section -->
       <indicators-section
         id="indicators-section"
-        class="tw-mt-10"
+        class="tw-mt-10 tw-px-4 sm:tw-px-8"
         :data="selectedCensusData"
         :selected-geography-name="selectedGeographyName"
         :selected-geography-type="selectedGeographyType"
@@ -37,7 +38,7 @@
       <!-- Strip plots -->
       <strip-plots-section
         id="spi-section"
-        class="tw-mt-20"
+        class="tw-mt-20 tw-px-4 sm:tw-px-8"
         :selected-geography-name="selectedGeographyName"
         :selected-geography-type="selectedGeographyType"
         :selected-geography-size="selectedGeographySize"
@@ -53,7 +54,7 @@
       <!-- Trends -->
       <trends-section
         id="trends-section"
-        class="tw-mt-20"
+        class="tw-mt-20 tw-px-0 sm:tw-px-8"
         :selected-geography-name="selectedGeographyName"
         :selected-geography-type="selectedGeographyType"
         :data="data"

@@ -32,6 +32,11 @@
         <div>Progress</div>
         <div class="tw-ml-0.5 tw-uppercase">PHL</div>
       </div>
+      <div
+        class="tw-pt-1 tw-font-['Montserrat'] tw-text-sm tw-font-medium tw-uppercase tw-leading-none tw-text-[#0F7582]"
+      >
+        BETA
+      </div>
     </div>
 
     <!-- Right part (not mobile) -->

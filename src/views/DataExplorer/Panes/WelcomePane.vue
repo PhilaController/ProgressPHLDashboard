@@ -4,7 +4,7 @@
       class="tw-flex tw-flex-col tw-border-b-4 tw-border-stone-400/50 tw-pb-10 lg:tw-flex-row"
     >
       <!-- Left column -->
-      <div class="tw-mr-2 tw-w-full tw-px-8 lg:tw-w-8/12">
+      <div class="tw-mr-2 tw-w-full tw-px-4 sm:tw-px-8 lg:tw-w-8/12">
         <div class="tw-text-3xl tw-font-bold">
           Welcome to the ProgressPHL Data Explorer!
         </div>
@@ -52,7 +52,7 @@
       </div>
 
       <!-- Right column -->
-      <div class="tw-mt-8 tw-w-full tw-px-8 lg:tw-mt-0 lg:tw-w-4/12">
+      <div class="tw-mt-8 tw-w-full tw-px-4 sm:tw-px-8 lg:tw-mt-0 lg:tw-w-4/12">
         <div
           class="tw-flex tw-flex-col tw-gap-8 tw-text-base md:tw-flex-row lg:tw-flex-col"
         >
@@ -91,9 +91,9 @@
     </div>
 
     <div
-      class="tw-mt-8 tw-flex tw-flex-col tw-items-center tw-justify-center tw-px-8 tw-text-lg"
+      class="tw-mt-8 tw-flex tw-flex-col tw-items-center tw-justify-center tw-px-4 tw-text-lg sm:tw-px-8"
     >
-      <div>Have questions about this app? Suggestions?</div>
+      <div class="tw-text-center">Have questions about this app? Suggestions?</div>
       <div class="tw-mt-0.5 tw-leading-none">
         <a
           class="tw-font-semibold tw-text-[#0F7582]/80 visited:tw-text-[#0F7582]/80 hover:tw-cursor-pointer hover:tw-text-[#0F7582]"

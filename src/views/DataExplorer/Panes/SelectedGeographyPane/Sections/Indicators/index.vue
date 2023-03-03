@@ -6,7 +6,7 @@
     >
       <i class="far fa-chart-bar tw-mr-1.5 tw-text-3xl"></i>
 
-      <div class="tw-text-2xl tw-font-bold">Indicators</div>
+      <div class="tw-text-2xl tw-font-bold">{{ title }}</div>
     </div>
 
     <!-- Intro text -->
@@ -147,10 +147,15 @@ import AgeSexChart from "./AgeSexChart";
 import { format } from "d3-format";
 import { group } from "d3-array";
 
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 export default {
   name: "IndicatorsSection",
   props: ["data", "selectedGeographyName", "selectedGeographyType"],
   components: { LoadingOverlay, RaceEthnicityChart, AgeSexChart },
+
   methods: {
     getVariable(variable) {
       return this.data.find((d) => d.indicator === variable)["estimate"];
@@ -168,6 +173,9 @@ export default {
     },
   },
   computed: {
+    title() {
+      return capitalizeFirstLetter(this.selectedGeographyType) + " Indicators";
+    },
     population_2010() {
       return this.getVariable("population_2010");
     },

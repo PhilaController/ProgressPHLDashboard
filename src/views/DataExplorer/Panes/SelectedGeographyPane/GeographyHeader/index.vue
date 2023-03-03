@@ -6,7 +6,7 @@
   >
     <!-- Header -->
     <div
-      class="tw-mt-2 tw-mb-1 tw-flex tw-flex-col tw-px-4 tw-text-3xl sm:tw-mt-0 sm:tw-flex-row sm:tw-items-end sm:tw-px-8"
+      class="tw-mt-4 tw-mb-1 tw-flex tw-flex-col tw-px-4 tw-text-3xl sm:tw-flex-row sm:tw-items-end sm:tw-px-8 lg:tw-mt-0"
     >
       <div class="tw-font-bold">
         <a
@@ -66,7 +66,12 @@
     />
 
     <!-- Section links -->
-    <section-links @scroll="$emit('scroll', $event)" />
+    <section-links
+      @scroll="$emit('scroll', $event)"
+      :selected-geography-type="selectedGeographyType"
+      v-if="$mq !== 'mobile'"
+    />
+    <div v-else class="tw-mb-4"></div>
   </div>
 </template>
 

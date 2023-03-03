@@ -1,30 +1,22 @@
 <template>
-  <div class="tw-relative">
-    <circle-legend
-      v-if="useRadiusScale"
-      :radius-scale="radiusScale"
-      :width="215"
-      :height="75"
-      :title="legendTitle"
-      :sizes="[0, 0.5, 1.0]"
-    />
-  </div>
+  <div></div>
 </template>
 
 <script>
-import CircleLegend from "./CircleLegend";
 import ResponsiveChart from "@/components/ResponsiveChart";
-import { max, min } from "d3-array";
+
+// d3
+import { max } from "d3-array";
 import { select } from "d3-selection";
 import { axisLeft, axisBottom } from "d3-axis";
-import { scaleLinear, scalePow } from "d3-scale";
+import { scaleLinear } from "d3-scale";
 import { regressionLoess } from "d3-regression";
 import { line } from "d3-shape";
 
 export default {
   name: "ScatterChart",
   mixins: [ResponsiveChart],
-  components: { CircleLegend },
+  components: {},
   props: [
     "data",
     "height",
@@ -35,7 +27,6 @@ export default {
     "ylabel",
     "xTickFormat",
     "xLabelFormat",
-    "legendTitle",
   ],
   data() {
     return {
@@ -64,38 +55,8 @@ export default {
     /**
      * Update styles when focused ids change
      */
-    hiddenIds(newValue) {
-      // Save the vue instance
-      let t = this;
-
-      // Remove the old crosshair
-      this.removeCrosshairs("select");
-
-      // Get the circles and style them
-      let svg = this.svg.select(".padding-group");
-      svg.selectAll("circle").each(function (d, i) {
-        // Get the circle selection
-        let circle = select(this);
-
-        // This value is hidden
-        if (newValue.includes(d.geoid)) {
-          circle.call(t.setHiddenStyle);
-
-          if (d.geoid === t.selectedGeoid) {
-            t.removeCrosshairs("select");
-          }
-        } else {
-          // Reset back to default
-          if (t.focusedIds.includes(d.geoid)) {
-            circle.call(t.setFocusedStyle);
-          } else {
-            circle.call(t.setDefaultStyle);
-          }
-          if (d.geoid === t.selectedGeoid) {
-            t.addCrosshairs(d, "select");
-          }
-        }
-      });
+    hiddenIds() {
+      this.styleCircles();
     },
     /**
      * If data changes, update chart
@@ -111,44 +72,11 @@ export default {
     /**
      * Update styles when focused ids change
      */
-    focusedIds(newValue) {
-      // Save the vue instance
-      let t = this;
-
-      // Remove the old crosshair
-      this.removeCrosshairs("select");
-
-      // Get the circles and style them
-      let svg = this.svg.select(".padding-group");
-      svg.selectAll("circle").each(function (d, i) {
-        // Get the circle selection
-        let circle = select(this);
-
-        // Crosshairs for selected
-        if (d.geoid === t.selectedGeoid) {
-          t.addCrosshairs(d, "select");
-        }
-
-        // Reset back to default
-        if (newValue.includes(d.geoid)) {
-          circle.call(t.setFocusedStyle);
-        } else {
-          circle.call(t.setDefaultStyle);
-        }
-      });
+    focusedIds() {
+      this.styleCircles();
     },
   },
   computed: {
-    circleLegendSizes() {
-      let a = min(this.data, (d) => d.r);
-      let b = max(this.data, (d) => d.r);
-      return [a, 0.5 * (a + b), b];
-    },
-    radiusScale() {
-      return scalePow().exponent(0.5).range([4, 15]).domain([0, 1.0]);
-      //max(this.data, (d) => d.r)]);
-    },
-
     /**
      * Scale for x-axis
      */
@@ -179,6 +107,44 @@ export default {
     },
   },
   methods: {
+    styleCircles() {
+      // Save the vue instance
+      let t = this;
+
+      // Remove the old crosshair
+      this.removeCrosshairs("select");
+
+      // Get the circles and style them
+      let svg = this.svg.select(".padding-group");
+      let selectedCircle;
+      svg.selectAll("circle").each(function (d, i) {
+        // Get the circle selection
+        let circle = select(this);
+
+        // This value is hidden
+        if (t.hiddenIds.includes(d.geoid)) {
+          circle.call(t.setHiddenStyle);
+
+          if (d.geoid === t.selectedGeoid) {
+            t.removeCrosshairs("select");
+          }
+        } else {
+          // Reset back to default
+          if (t.focusedIds.includes(d.geoid)) {
+            circle.call(t.setFocusedStyle);
+          } else {
+            circle.call(t.setDefaultStyle);
+          }
+          if (d.geoid === t.selectedGeoid) {
+            t.addCrosshairs(d, "select");
+            selectedCircle = circle;
+          }
+        }
+      });
+
+      // Raise the selected circle
+      if (selectedCircle) selectedCircle.raise();
+    },
     /**
      * Add crosshairs
      */
@@ -389,7 +355,11 @@ export default {
         .select(".padding-group");
 
       // Set up axes
-      const xAxis = axisBottom(this.xScale).tickFormat(this.xTickFormat);
+      let numTicks;
+      if (this.$mq === "mobile") numTicks = 4;
+      const xAxis = axisBottom(this.xScale)
+        .tickFormat(this.xTickFormat)
+        .ticks(numTicks);
       const yAxis = axisLeft(this.yScale);
 
       // Draw the axes
@@ -433,15 +403,13 @@ export default {
         .join("circle")
         .attr("cx", (d) => this.xScale(d.x))
         .attr("cy", (d) => this.yScale(d.y))
-        .attr("r", (d) =>
-          this.useRadiusScale ? this.radiusScale(d.r) : this.circleSize
-        )
+        .attr("r", this.circleSize)
         .call(this.setDefaultStyle);
 
-      // Not focused circles
+      // Hidden circles
       circles
-        .filter((d) => !this.focusedIds.includes(d.geoid))
-        .call(this.setDefaultStyle);
+        .filter((d) => this.hiddenIds.includes(d.geoid))
+        .call(this.setHiddenStyle);
 
       // Focus the rest
       circles

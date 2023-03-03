@@ -196,24 +196,22 @@ export default {
     isLoading() {
       this.initialize();
     },
-    dimension(newValue, oldValue) {
-      if (newValue !== oldValue) {
-        this.$emit("dimension", newValue);
+    dimension(newValue) {
+      this.$emit("dimension", newValue);
 
-        // Do nothing on mobile
-        if (this.$mq === "mobile") return;
+      // Do nothing on mobile
+      if (this.$mq === "mobile") return;
 
-        // Remove links
-        let svg = select(this.$el).select("svg");
-        svg.selectAll(".indicator-link").remove();
-        svg.selectAll(".definition-link").remove();
-      }
+      // Remove links
+      let svg = select(this.$el).select("svg");
+      svg.selectAll(".indicator-link").remove();
+      svg.selectAll(".definition-link").remove();
     },
     component(newValue, oldValue) {
       // Do nothing on mobile
       if (this.$mq === "mobile") return;
 
-      if (newValue != oldValue && newValue != null) {
+      if (newValue != null) {
         // Add component --> indicator links
         select(this.$el).select("svg").selectAll(".indicator-link").remove();
         this.addIndicatorLinks(newValue);
@@ -223,7 +221,7 @@ export default {
       // Do nothing on mobile
       if (this.$mq === "mobile") return;
 
-      if (newValue != oldValue) {
+      if (newValue != null) {
         //
         let svg = select(this.$el).select("svg");
 
@@ -306,6 +304,11 @@ export default {
     setDimension(value) {
       if (this.$route.query.value === value) return;
 
+      // Remove any indicators links
+      let svg = select(this.$el).select("svg");
+      svg.selectAll(".indicator-link").remove();
+      svg.selectAll(".definition-link").remove();
+
       // Set
       this.dimension = value;
       this.component = this.indicator = null;
@@ -319,6 +322,10 @@ export default {
      */
     setComponent(value) {
       if (this.$route.query.value === value) return;
+
+      // Remove any indicators links
+      let svg = select(this.$el).select("svg");
+      svg.selectAll(".definition-link").remove();
 
       // Set selections
       this.indicator = null;
@@ -348,6 +355,7 @@ export default {
       Add links from component to indicator
     */
     addIndicatorLinks(component) {
+      console.log("ADDING indicator links", component);
       let id_selector = `#component_${component}`;
       waitForElm(id_selector).then((elem) => {
         // Get the svg

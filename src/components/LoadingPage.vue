@@ -14,7 +14,7 @@ export default {
 .loader {
   width: 48px;
   height: 48px;
-  border: 5px solid #f0f0f0;
+  border: 5px solid #e5e7eb;
   border-bottom-color: #0f7582;
   border-radius: 50%;
   display: inline-block;

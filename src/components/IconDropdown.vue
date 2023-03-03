@@ -35,7 +35,7 @@
             focusedMenuitem === null ? selectedMenuitem : focusedMenuitem
           )
         "
-        class="tw-absolute tw-right-0 tw-z-[11] tw-mt-1 tw-hidden tw-max-h-[300px] tw-overflow-scroll tw-rounded-b tw-border tw-border-gray-300 tw-bg-white tw-text-sm tw-shadow-sm focus:tw-text-black"
+        class="tw-absolute tw-right-0 tw-z-[8] tw-mt-1 tw-hidden tw-max-h-[300px] tw-overflow-scroll tw-rounded-b tw-border tw-border-gray-300 tw-bg-white tw-text-sm tw-shadow-sm focus:tw-text-black"
         @keydown="onMenuKeydown"
       >
         <!-- List item -->
