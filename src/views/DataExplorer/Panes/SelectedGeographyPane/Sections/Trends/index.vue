@@ -22,13 +22,7 @@
           <circle cx="169.34" cy="113.5" r="13.17" />
         </svg>
       </div>
-      <div class="tw-ml-2 tw-text-2xl tw-font-bold">
-        {{
-          $mq === "mobile"
-            ? "SPI vs. Economic Data"
-            : "Comparing Social Progress and Economic Status"
-        }}
-      </div>
+      <div class="tw-ml-2 tw-text-2xl tw-font-bold">Citywide Trends</div>
     </div>
 
     <!-- Intro text -->
@@ -50,13 +44,20 @@
         tracts that have been able to overperform and achieve higher levels of
         social progress than others.
       </p>
+    </div>
 
-      <p class="tw-mt-3">
+    <!-- Title -->
+    <div class="tw-mt-6 tw-px-4 sm:tw-px-0">
+      <div class="tw-pb-2 tw-text-base tw-font-semibold">
+        Chart Interactions
+      </div>
+
+      <p class="tw-text-sm">
         <template v-if="selectedGeographyType == 'tract'">
           The score for the
           <span class="tw-font-medium">{{ selectedGeographyName }}</span>
-          tract is selected and highlighted in red. To view data for a different
-          tract, hover over and click on a specific circle in the chart.
+          tract is selected and highlighted in red. To change the main tract
+          selection, hover over and click on a specific circle in the chart.
         </template>
         <template v-else>
           The scores for the
@@ -65,14 +66,17 @@
           <span class="tw-font-medium"
             >{{ selectedGeographyName }} {{ selectedGeographyType }}</span
           >
-          are highlighted in red. To view data for an individual tract, hover
-          over and click on a specific circle in the chart.
+          are highlighted in red. To change the main tract selection, hover over
+          and click on a specific circle in the chart.
         </template>
+        To add a tract to the scorecard comparison tab, hold command
+        <span>(<command-icon />)</span>
+        and click on a circle in the chart.
       </p>
     </div>
 
     <!-- Chart options -->
-    <div class="tw-mt-10 tw-px-4 sm:tw-px-0">
+    <div class="tw-mt-6 tw-px-4 sm:tw-px-0">
       <!-- Title -->
       <div class="tw-pb-2 tw-text-base tw-font-semibold">Chart Options</div>
 
@@ -170,7 +174,7 @@
           />
 
           <div
-            class="tw-mt-2 tw-min-h-[75px] tw-max-w-[400px] tw-text-xs tw-italic"
+            class="tw-mt-2 tw-min-h-[50px] tw-max-w-[400px] tw-text-xs tw-italic"
           >
             <template v-if="hiddenIds.length > 0 && selectedData">
               Currently showing {{ visibleTracts }} out of
@@ -187,10 +191,32 @@
     </div>
 
     <div
-      class="tw-relative tw-mt-4 tw-flex tw-w-full tw-justify-start tw-px-0 sm:tw-px-0"
+      class="tw-relative tw-mt-4 tw-flex tw-w-full tw-flex-col tw-justify-start tw-px-0 sm:tw-px-0"
     >
+      <div
+        class="tw-absolute tw-top-0 tw-right-0 tw-z-[7] tw-w-[400px] tw-rounded tw-border tw-border-gray-300 tw-px-2 tw-py-1"
+      >
+        <p v-if="scorecardTracts.length === 0" class="tw-text-sm tw-italic">
+          No tracts selected for scorecard comparison. To add a tract, hold
+          command
+          <span>(<command-icon />)</span>
+          and click on a circle in the chart.
+        </p>
+        <p v-else class="tw-text-sm tw-italic">
+          Tracts selected for scorecard comparison:<br />
+          <span class="tw-font-medium">{{ scorecardTracts.join(", ") }}</span>
+          <span
+            class="tw-ml-3 tw-font-semibold tw-text-[#0F7582]/80 visited:tw-text-[#0F7582]/80 hover:tw-cursor-pointer hover:tw-text-[#0F7582] hover:tw-underline focus:tw-outline-none active:tw-text-[#0F7582]"
+            @click.prevent="handleScorecardTractReset"
+            >Clear</span
+          >
+        </p>
+      </div>
+
       <scatter-chart
         v-if="selectedData"
+        ref="scatterChart"
+        class="tw-mt-4"
         :height="550"
         :max-width="1000"
         :data="selectedData"
@@ -201,6 +227,7 @@
         :x-tick-format="tickFormatter"
         :x-label-format="labelFormatter"
         @click="$emit('geography:select', $event)"
+        @right-click="handleRightClick"
         @mouseover="$emit('geography:hover', $event)"
         @mouseleave="$emit('geography:unhover')"
       />
@@ -210,10 +237,11 @@
 </template>
 
 <script>
-import LoadingOverlay from "@/components/LoadingOverlay";
-import Dropdown from "@/components/Dropdown";
+import LoadingOverlay from "@/components/Loading/LoadingOverlay";
+import Dropdown from "@/components/Dropdowns/Dropdown";
 import ScatterChart from "./ScatterChart";
 import InputButton from "./InputButton";
+import CommandIcon from "./CommandIcon";
 import { json } from "d3-fetch";
 import { format } from "d3-format";
 
@@ -228,8 +256,15 @@ export default {
     "selectedGeographyName",
     "selectedGeographyType",
     "focusedIds",
+    "scorecardTracts",
   ],
-  components: { ScatterChart, Dropdown, InputButton, LoadingOverlay },
+  components: {
+    ScatterChart,
+    Dropdown,
+    InputButton,
+    LoadingOverlay,
+    CommandIcon,
+  },
   data() {
     return {
       /**
@@ -277,8 +312,6 @@ export default {
        * Is the chart ready?
        */
       chartReady: false,
-
-      error: "",
     };
   },
 
@@ -422,6 +455,21 @@ export default {
     },
   },
   methods: {
+    handleScorecardTractReset() {
+      this.$emit("comparison:reset");
+      this.$refs.scatterChart.resetRightClickSelection();
+    },
+
+    /**
+     * Handle right click
+     */
+    handleRightClick({ name }) {
+      if (this.scorecardTracts.includes(name))
+        this.$emit("comparison:remove", name);
+      else if (this.scorecardTracts.length < 2) {
+        this.$emit("comparison:add", name);
+      }
+    },
     handleDemographicReset() {
       this.$refs.demographicFilterInput.handleClear();
       this.selectedDemographicVariable = null;

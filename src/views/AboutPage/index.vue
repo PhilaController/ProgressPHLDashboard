@@ -1,15 +1,14 @@
 <template>
-  <div
-    class="tw-relative tw-flex tw-flex-col tw-text-base"
-    :style="getPaddingTop(controllerNavHeight)"
+  <content-wrapper
+    :controller-nav-height="controllerNavHeight"
+    :use-padding="usePadding"
+    :nav-bar-height="navBarHeight"
+    :is-loading="false"
   >
-    <!-- Navbar -->
-    <navbar :height="navBarHeight" />
-
-    <div :style="getPaddingTop(navBarHeight)">
+    <div class="tw-mt-8 tw-text-base">
       <!-- Intro message -->
       <div
-        class="text-content tw-mt-8 tw-text-lg tw-italic sm:tw-text-xl md:tw-text-2xl"
+        class="text-content tw-text-lg tw-italic sm:tw-text-xl md:tw-text-2xl"
       >
         <p>
           ProgressPHL is a joint effort by the Controller's Office and the
@@ -55,15 +54,15 @@
           indicators provide granular and detailed information about what is
           going on in each of Philadelphia's neighborhoods. The regions, which
           are smaller than the typical neighborhood, cover areas that have
-          populations ranging from about 2,500 to 8,000 people, with an average
+          populations ranging from about 1,000 to 9,000 people, with an average
           population of about 4,000.
         </p>
         <p class="tw-mt-6">
           For each neighborhood across the city, the Philadelphia SPI is
           constructed from three primary dimensions and four components per
           dimension, for a total of 12 components. The overal SPI score for a
-          region, as well as the scores for each dimension and component score,
-          are scaled from 0 to 100, allowing easy and intuitive comparison of
+          region, as well as the scores for each dimension and component, are
+          scaled from 0 to 100, allowing easy and intuitive comparison of
           neighborhoods to gauge social progress performance.
         </p>
         <p class="tw-mt-6">
@@ -74,7 +73,7 @@
           in the diagram below. For more information,
           <a
             class="tw-font-medium tw-text-[#0F7582] visited:tw-text-[#0F7582] hover:tw-text-[#0F7582] hover:tw-underline"
-            href="#"
+            href="https://controller.phila.gov/wp-content/uploads/2023/03/ProgressPHL-Methodological-Note.pdf"
             target="_blank"
             >check out the detailed methodology report</a
           >
@@ -94,18 +93,33 @@
         :data="data"
       />
     </div>
-  </div>
+  </content-wrapper>
 </template>
 
 <script>
-import Navbar from "@/components/Navbar";
+import ContentWrapper from "@/components/ContentWrapper";
 import SocialProgressFramework from "./SocialProgressFramework";
 import DimensionSummary from "./DimensionSummary";
 
 export default {
   name: "AboutPage",
-  components: { Navbar, SocialProgressFramework, DimensionSummary },
-  props: ["controllerNavHeight", "navBarHeight", "usePadding"],
+  components: { SocialProgressFramework, DimensionSummary, ContentWrapper },
+  props: {
+    /**
+     * The height of the ProgressPHL navbar in pixels
+     */
+    navBarHeight: { type: Number },
+
+    /**
+     * The height of the controller.phila.gov navbar in pixels
+     */
+    controllerNavHeight: { type: Number },
+
+    /**
+     * Do we need top padding
+     */
+    usePadding: { type: Boolean },
+  },
   data() {
     return {
       data: [
@@ -189,12 +203,6 @@ export default {
         },
       ],
     };
-  },
-  methods: {
-    getPaddingTop(padding) {
-      if (this.usePadding) return `padding-top: ${padding}px`;
-      else return "";
-    },
   },
 };
 </script>

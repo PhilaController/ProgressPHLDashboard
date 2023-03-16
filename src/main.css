@@ -1,11 +1,98 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import "~maplibre-gl/dist/maplibre-gl.css";
 
+/* Hide the social share */
+.addthis-smartlayers {
+  display: none !important;
+}
+
+/** Remove the footer */
 footer {
   display: none !important;
 }
 
+/** Hide the theme's subheader */
+.site-subheader {
+  display: none !important;
+}
+
+/* Text content */
+@media (min-width: 576px) {
+  .text-content {
+    max-width: 540px;
+  }
+}
+@media (min-width: 768px) {
+  .text-content {
+    max-width: 720px;
+  }
+}
+@media (min-width: 992px) {
+  .text-content {
+    max-width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .text-content {
+    max-width: 1140px;
+  }
+}
+.text-content {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+  text-align: left;
+}
+
+/* App-wide settings */
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+}
+
+/* Scorecard */
+.scorecard-cell {
+  display: flex;
+  flex-direction: row;
+}
+.grid-row-wrapper-header,
+.grid-row-wrapper-1,
+.grid-row-wrapper-2,
+.grid-row-wrapper-3 {
+  display: contents;
+}
+
+.grid-row-wrapper-3.last > .scorecard-cell:not(:first-child) {
+  @apply tw-border-b tw-border-stone-300;
+}
+
+.scorecard-grid {
+  @apply tw-grid tw-w-full tw-grid-cols-[min-content_2fr_1fr_min-content] tw-items-end tw-gap-x-0;
+}
+
+.scorecard-grid-double {
+  @apply tw-grid tw-w-full tw-grid-cols-[2fr_1fr_min-content_min-content_1fr_min-content_min-content] tw-items-end tw-gap-x-0;
+}
+
+.grid-row-wrapper-2 > .scorecard-cell {
+  padding-top: 1rem !important;
+  padding-bottom: 1rem !important;
+}
+
+.grid-row-wrapper-3 > .scorecard-cell {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+.grid-row-wrapper-3.last > .scorecard-cell {
+  padding-bottom: 1rem !important;
+}
+
+/* Buttons */
 .btn-default {
   @apply tw-min-w-[100px] tw-rounded tw-border-[1px] tw-border-solid tw-px-3 tw-py-3 tw-text-center tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[2px] sm:tw-w-fit sm:tw-border-[2px] sm:tw-text-sm md:tw-px-6 md:tw-py-3 md:tw-text-base;
 }
@@ -15,7 +102,7 @@ footer {
 }
 
 .btn-default-colors-bw {
-  @apply tw-border-stone-500 tw-bg-stone-100 tw-text-stone-500 tw-transition-all tw-delay-100 tw-ease-in-out hover:tw-cursor-pointer hover:tw-bg-stone-300 focus:tw-bg-stone-300  focus:tw-outline focus:tw-outline-2 focus:tw-outline-offset-2 focus:tw-outline-stone-300;
+  @apply tw-border-gray-300 tw-bg-white tw-text-inherit tw-transition-all tw-delay-100 tw-ease-in-out hover:tw-cursor-pointer hover:tw-bg-gray-100 focus:tw-bg-gray-100  focus:tw-outline-none focus:tw-outline-0;
 }
 
 .btn-default-colors {

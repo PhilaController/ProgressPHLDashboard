@@ -49,7 +49,7 @@ export default {
      */
     height: {
       type: Number,
-      default: 150,
+      default: 80,
     },
 
     /**
@@ -63,7 +63,7 @@ export default {
     /**
      * Add the axis labels?
      */
-    addAxisLabels: { type: Boolean, default: true },
+    addAxisLabels: { type: Boolean, default: false },
   },
 
   data() {
@@ -99,7 +99,7 @@ export default {
      * Hidden opacity
      */
     hiddenOpacity() {
-      return this.$mq === "mobile" ? 0.1 : 0.2;
+      return this.$mq === "mobile" ? 0.1 : 0.1;
     },
     /** Width of the chart */
     width() {
@@ -174,7 +174,7 @@ export default {
     /**
      * Add value labels for selected circle
      */
-    addSelectionLabels() {
+    addSelectionLabels(geoid) {
       // Save the vue instance
       let t = this;
       let svg = select(t.$el).select("svg > g");
@@ -185,7 +185,7 @@ export default {
         let circle = select(this);
 
         // Add the labels
-        if (d.geoid == t.selectedGeoid) {
+        if (d.geoid == geoid) {
           // Format function
           let f = format(".0f");
 
@@ -241,7 +241,8 @@ export default {
           d.geoid === this.selectedGeoid
             ? this.selectedOpacity
             : this.hoverOpacity
-        );
+        )
+        .raise();
     },
 
     /**
@@ -314,7 +315,7 @@ export default {
           .join("line")
           .attr("x1", (d) => this.x(d))
           .attr("x2", (d) => this.x(d))
-          .attr("y1", this.y(0.9))
+          .attr("y1", this.y(0.8))
           .attr("y2", this.y(0.5))
           .attr("stroke", "#a1a1a1")
           .attr("stroke-width", "2px");
@@ -323,10 +324,10 @@ export default {
           .data([0, 50, 100])
           .join("text")
           .attr("x", (d) => this.x(d))
-          .attr("y", this.y(0.9))
+          .attr("y", this.y(0.8))
           .attr("dx", 0)
           .attr("dy", -5)
-          .style("font-size", "1em")
+          .style("font-size", "0.85em")
           .style("fill", "#525252")
           .attr("text-anchor", "middle")
           .text((d) => d);
@@ -401,7 +402,7 @@ export default {
       this.drawChart();
 
       // Add value labels?
-      if (this.showLabels) this.addSelectionLabels();
+      if (this.showLabels) this.addSelectionLabels(this.selectedGeoid);
     },
 
     /**
@@ -411,7 +412,15 @@ export default {
       // Save the vue component
       let t = this;
 
+      // Remove any old selection labels
+      this.removeSelectionLabels();
+
+      // Do we need to show labels
+      if (this.showLabels && newValue === null)
+        this.addSelectionLabels(this.selectedGeoid);
+
       // Iterate over circles
+      let hoveredCircle;
       select(this.$el)
         .select("svg")
         .selectAll("circle")
@@ -419,17 +428,29 @@ export default {
           // Get the circle selection
           let circle = select(this);
 
-          // Reset back to default
-          if (d.geoid === oldValue) {
-            if (t.focusedIds.includes(oldValue)) circle.call(t.setFocusedStyle);
+          // Style a hovered circle
+          if (newValue !== null) {
+            // Hide all
+            circle.call(t.setHiddenStyle);
+
+            // Handle new hover
+            if (d.geoid === newValue) {
+              hoveredCircle = circle;
+              circle.call(t.setHoverStyle);
+            }
+          }
+          // Restore: No more hovered circle
+          else {
+            if (t.focusedIds.includes(d.geoid)) circle.call(t.setFocusedStyle);
             else circle.call(t.setHiddenStyle);
           }
-
-          // Handle new hover
-          if (d.geoid === newValue) {
-            circle.call(t.setHoverStyle);
-          }
         });
+
+      // Raise the hovered circle
+      if (hoveredCircle) {
+        hoveredCircle.raise();
+        this.addSelectionLabels(newValue);
+      }
     },
 
     /**
@@ -465,7 +486,7 @@ export default {
         this.removeSelectionLabels();
 
         // Add new ones
-        if (newValue) this.addSelectionLabels();
+        if (newValue) this.addSelectionLabels(newValue);
       }
     },
   },

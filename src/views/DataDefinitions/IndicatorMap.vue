@@ -7,8 +7,8 @@
         v-if="colorScale"
         class="tw-absolute tw-z-[7] tw-m-2 tw-rounded tw-border tw-border-zinc-800 tw-bg-stone-100 tw-p-2"
       >
-        <div class="tw-text-sm tw-font-bold tw-text-zinc-800">
-          {{ selectedVariable }}
+        <div class="tw-text-sm tw-font-semibold tw-text-zinc-800">
+          {{ selectedVariableAlias }}
         </div>
 
         <div
@@ -17,28 +17,30 @@
           <div>{{ legendLabelLeft }}</div>
           <div>{{ legendLabelRight }}</div>
         </div>
-        <MapLegend
+
+        <map-legend
           class="tw-mt-0.5"
           :color="colorScale"
-          :tickSize="8"
+          :tick-size="8"
           :width="275"
           :height="30"
-          :marginLeft="5"
-          :marginRight="15"
-          :marginTop="1"
+          :margin-left="5"
+          :margin-right="15"
+          :margin-top="1"
           :percentage="selectedDefinition.percentage"
+          :tick-format="selectedTickFormat"
         />
       </div>
 
       <!-- No data message -->
       <div
-        class="tw-absolute tw-left-0 tw-bottom-0 tw-z-[7] tw-m-2 tw-rounded tw-border tw-border-zinc-800 tw-bg-stone-100 tw-p-2"
+        class="tw-absolute tw-left-0 tw-bottom-0 tw-z-[6] tw-m-2 tw-rounded tw-border tw-border-zinc-800 tw-bg-stone-100 tw-p-2"
       >
         <div class="tw-flex">
           <div
             class="tw-h-[20px] tw-w-[20px] tw-rounded tw-border tw-border-zinc-800 tw-bg-[#d4d4d4]"
           ></div>
-          <div class="tw-ml-2 tw-text-sm tw-font-bold tw-text-zinc-800">
+          <div class="tw-ml-2 tw-text-sm tw-font-semibold tw-text-zinc-800">
             No data
           </div>
         </div>
@@ -49,28 +51,29 @@
         class="tw-absolute tw-right-0 tw-top-0 tw-z-[7] tw-m-2 tw-rounded tw-border tw-border-zinc-800 tw-bg-stone-100 tw-p-2"
         v-if="clickedId || hoveredId"
       >
-        <div class="tw-flex tw-min-w-[100px] tw-flex-col" v-if="clickedId">
+        <div
+          class="tw-flex tw-min-w-[100px] tw-flex-col tw-items-center"
+          v-if="clickedId"
+        >
           <div
-            class="tw-mb-4 tw-w-fit tw-border-b tw-border-zinc-800 tw-font-bold"
+            class="tw-mb-4 tw-w-fit tw-border-b tw-border-zinc-800 tw-font-semibold"
           >
-            Census Tract {{ clickedId }}
+            {{ clickedName }}
           </div>
 
-          <div class="tw-italic">
-            Go to:
+          <div>
             <router-link
-              class="tw-font-bold tw-not-italic tw-text-[#0F7582] visited:tw-text-[#0F7582] hover:tw-text-[#0F7582] hover:tw-underline"
-              :to="{ path: '/explorer', query: { tract: clickedId } }"
+              class="tw-font-semibold tw-not-italic tw-text-[#0F7582] visited:tw-text-[#0F7582] hover:tw-text-[#0F7582] hover:tw-underline"
+              :to="{ path: '/explorer', query: { tract: clickedName } }"
               >Explorer</router-link
-            >
+            ><i class="fas fa-search tw-ml-1"></i>
           </div>
-          <div class="tw-italic">
-            Go to:
+          <div>
             <router-link
-              class="tw-font-bold tw-not-italic tw-text-[#0F7582] visited:tw-text-[#0F7582] hover:tw-text-[#0F7582] hover:tw-underline"
-              :to="{ path: '/scorecard', query: { tract: clickedId } }"
+              class="tw-font-semibold tw-not-italic tw-text-[#0F7582] visited:tw-text-[#0F7582] hover:tw-text-[#0F7582] hover:tw-underline"
+              :to="{ path: `/scorecards/${clickedName}` }"
               >Scorecard</router-link
-            >
+            ><i class="fas fa-table tw-ml-1"></i>
           </div>
         </div>
         <div
@@ -112,27 +115,50 @@ import MapLegend from "./MapLegend";
 
 export default {
   name: "IndicatorMap",
-  props: [
-    "data",
-    "geojson",
-    "aliases",
-    "hierarchy",
-    "definitions",
-    "selectedVariable",
-    "selectedDimension",
-  ],
+  props: {
+    /**
+     * The geojson collections
+     */
+    geojson: { type: Object },
+
+    /**
+     * SPI data
+     */
+    data: { type: Object },
+
+    /**
+     * Mapping from variable to its components
+     */
+    hierarchy: { type: Object, required: true },
+
+    /**
+     * Definitions for each variable
+     */
+    definitions: { type: Object, required: true },
+
+    /**
+     * Aliases for each variable
+     */
+    aliases: { type: Object, required: true },
+
+    /**
+     * Selected variable to show
+     */
+    selectedVariable: { type: String },
+
+    /**
+     * Selected dimension
+     */
+    selectedDimension: { type: String },
+  },
+
   components: { MapLegend },
   data() {
     return {
-      dimensionNames: [
-        "basic_human_needs",
-        "foundations_of_wellbeing",
-        "opportunity",
-      ],
-
       // The hovered and clicked IDs
       hoveredId: null,
       clickedId: null,
+      clickedName: null,
 
       // Color scale
       colorScale: null,
@@ -154,50 +180,71 @@ export default {
           40.19853877259828,
         ],
       },
-
-      legendThresholds: 8,
     };
   },
   computed: {
+    /**
+     * Alias for selected variable
+     */
+    selectedVariableAlias() {
+      return this.aliases[this.selectedVariable];
+    },
+
+    /**
+     * Tick format for selected variable
+     */
+    selectedTickFormat() {
+      if (!this.isIndicator) return ".0f";
+      else {
+        let fmt = this.selectedDefinition.fmt;
+        if (fmt.startsWith(".2")) return ".1f";
+        else return ".0f";
+      }
+    },
+
+    /**
+     * Is the selected variable an indicator?
+     */
+    isIndicator() {
+      // Check dimensions
+      let dimensions = this.hierarchy["social_progress_index"];
+      if (dimensions.includes(this.selectedVariable)) return false;
+
+      // Check components
+      for (let i = 0; i < dimensions.length; i++) {
+        let dim = dimensions[i];
+        if (this.hierarchy[dim].includes(this.selectedVariable)) return false;
+      }
+
+      // It's an indicator
+      return true;
+    },
+
+    /**
+     * Definition for selected variable
+     */
     selectedDefinition() {
-      let i = this.aliasedVariables.indexOf(this.selectedVariable);
-      let key = this.variables[i];
-      let out = this.definitions[key];
+      let out = this.definitions[this.selectedVariable];
       if (out == undefined) return {};
       else return out;
     },
-    legendLabelLeft() {
-      let i = this.aliasedVariables.indexOf(this.selectedVariable);
-      let key = this.variables[i];
 
-      if (this.isComponent(key)) {
+    /**
+     * Label for left part of legend
+     */
+    legendLabelLeft() {
+      if (!this.isIndicator) {
         return "Worse";
-      } else if (!this.definitions[key].inverted) {
+      } else if (!this.selectedDefinition.inverted) {
         return "Worse";
       } else return "Better";
     },
+
+    /**
+     * Label for right part of legend
+     */
     legendLabelRight() {
       return this.legendLabelLeft == "Better" ? "Worse" : "Better";
-    },
-    variables() {
-      let out = ["social_progress_index"];
-      for (let i = 0; i < this.dimensionNames.length; i++) {
-        let dimension = this.dimensionNames[i];
-        out.push(dimension);
-        for (let j = 0; j < this.hierarchy[dimension].length; j++) {
-          let component = this.hierarchy[dimension][j];
-          out.push(component);
-
-          for (let k = 0; k < this.hierarchy[component].length; k++) {
-            let indicator = this.hierarchy[component][k];
-            out.push(indicator);
-          }
-        }
-      }
-      return out;
-    },
-    aliasedVariables() {
-      return this.variables.map((d) => this.aliases[d]);
     },
   },
   created() {
@@ -225,7 +272,7 @@ export default {
         // Add tooltip
         this.addTooltip(map);
 
-        //
+        // Handle a change in the selected variable
         this.handleVariableChange();
 
         // Update choropleth colors
@@ -249,13 +296,21 @@ export default {
     }
   },
   methods: {
+    /**
+     * Reset the clicked id
+     */
     resetClick() {
       this.map.setFeatureState(
         { source: "census-tracts-source", id: this.clickedId },
         { click: false }
       );
       this.clickedId = null;
+      this.clickedName = null;
     },
+
+    /**
+     * Handle a click on the map
+     */
     handleMapClick(e) {
       if (e.features.length > 0) {
         // The clicked feature
@@ -281,6 +336,8 @@ export default {
 
           // Set the new one
           this.clickedId = id;
+          this.clickedName = `${tract.properties.neighborhood_name} ${+tract
+            .properties.tract_id}`;
           this.map.setFeatureState(
             { source: "census-tracts-source", id: id },
             { click: true }
@@ -289,24 +346,18 @@ export default {
       }
     },
 
-    setClickedId(id) {},
-    isComponent(name) {
-      if (this.dimensionNames.includes(name)) return true;
-      for (let i = 0; i < this.dimensionNames.length; i++) {
-        let dim = this.dimensionNames[i];
-
-        if (this.hierarchy[dim].includes(name)) return true;
-      }
-      return false;
-    },
+    /**
+     * Update the map when the selected variable changes
+     */
     handleVariableChange() {
-      /*-------------------------------------
-      Map from tract id to data being shown on the map;
-      Allows for fast color setting in the map
-    /* -----------------------------------*/
-      let i = this.aliasedVariables.indexOf(this.selectedVariable);
-      let key = this.variables[i];
-      this.selectedMapData = group(this.data[key], (d) => d.geoid);
+      /**
+       * Map from tract id to data being shown on the map;
+       * Allows for fast color setting in the map
+       */
+      this.selectedMapData = group(
+        this.data[this.selectedVariable],
+        (d) => d.geoid
+      );
 
       // Determine color scheme
       let interpolator;
@@ -316,11 +367,14 @@ export default {
         interpolator = interpolateOranges;
       else interpolator = interpolateGreens;
 
-      if (this.isComponent(key)) {
+      // If not an indicator, it goes from 0 to 100
+      if (!this.isIndicator) {
         this.colorScale = scaleSequential()
           .domain([0, 100])
           .interpolator((v) => interpolator(1 - v));
-      } else {
+      }
+      // Set the domain based on the definition
+      else {
         let f = interpolator;
         if (!this.selectedDefinition.inverted) f = (v) => interpolator(1 - v);
 
@@ -331,13 +385,13 @@ export default {
       }
     },
 
-    /*-------------------------------------
-      Add layers and sources to the map
-    /* -----------------------------------*/
+    /**
+     * Add layers and sources to the map
+     */
     addLayers(map) {
-      /*-----------------------------------
-        2. Add the city limits
-      /*----------------------------------*/
+      /**
+       * Add city limits
+       */
       map.addSource("city-limits-source", {
         type: "geojson",
         data: this.geojson.cityLimits,
@@ -352,18 +406,14 @@ export default {
         },
       });
 
-      /*-----------------------------------
-        3. Add the census tracts
-      /*----------------------------------*/
-
-      // 3A. The source
+      /**
+       * Add the census tracts
+       */
       map.addSource("census-tracts-source", {
         type: "geojson",
         data: this.geojson.tracts,
         promoteId: "geoid",
       });
-
-      // 3B. Tract fills layer
       map.addLayer(
         {
           id: "tract-fills",
@@ -382,8 +432,6 @@ export default {
         },
         "Road/label/Local"
       );
-
-      // 3C. Tract outlines layer
       map.addLayer(
         {
           id: "tract-outlines",
@@ -406,9 +454,9 @@ export default {
       );
     },
 
-    /*-------------------------------------
-      Add tooltip to the map
-    /* -----------------------------------*/
+    /**
+     * Add tooltip to map
+     */
     addTooltip(map) {
       // Add tooltip
       let popup = new maplibregl.Popup({
@@ -442,13 +490,21 @@ export default {
       });
     },
 
-    /*-------------------------------------
-      Get the tooltip HTML content
-    /* -----------------------------------*/
+    /**
+     * Get the tooltip HTML content
+     */
     getTooltipHTML(d) {
       let v;
+      let def = this.selectedDefinition;
       if (d.value == null) v = "No data";
-      else v = format(".1f")(d.value);
+      else if (!this.isIndicator) {
+        v = `${format(".1f")(d.value)} / 100`;
+      } else {
+        let fmt = format(def.fmt);
+        v = fmt(d.value);
+        if (def.percentage) v += "%";
+        else if (def.units) v += ` ${def.units}`;
+      }
 
       return `<div class="tw-rounded tw-p-0.5 tw-text-center">
     <div
@@ -456,15 +512,15 @@ export default {
     >
       <div class="tw-text-base">${d.neighborhood_name} ${d.tract_id}</div>
     </div>
-    <div class="tw-mx-auto tw-text-center tw-text-2xl tw-font-bold">
+    <div class="tw-mx-auto tw-text-center tw-text-2xl tw-font-semibold">
       ${v}
     </div>
   </div>`;
     },
 
-    /*-------------------------------------
-      Reset the hovered feature state
-    /* -----------------------------------*/
+    /**
+     * Reset the hovered feature state
+     */
     resetHoverState() {
       // Reset existing hovered tract
       if (this.hoveredId !== null) {
@@ -478,9 +534,9 @@ export default {
       this.hoveredId = null;
     },
 
-    /*-------------------------------------
-      Set the hovered feature state
-    /* -----------------------------------*/
+    /**
+     * Set the hovered feature state
+     */
     setHoverState(e) {
       if (e.features.length > 0) {
         // The feature
@@ -510,9 +566,9 @@ export default {
       }
     },
 
-    /*-------------------------------------
-      Based on selected map data update "color" and "value" columns
-    /* -----------------------------------*/
+    /**
+     * Based on selected map data update "color" and "value" columns
+     */
     updateColorValues() {
       // Source data for census tracts
       let data = Object.assign({}, this.geojson.tracts);
@@ -549,6 +605,9 @@ export default {
     },
   },
   watch: {
+    /**
+     * When the variable changes, update the map
+     */
     selectedVariable(newValue, oldValue) {
       if (newValue != oldValue) {
         this.handleVariableChange();

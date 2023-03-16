@@ -1,8 +1,8 @@
 <template>
   <div
-    class="tw-mt-2 tw-flex tw-w-full tw-justify-around tw-bg-stone-100/25 tw-px-4 tw-text-base sm:tw-justify-start sm:tw-gap-8 sm:tw-px-8"
+    class="tw-flex tw-w-full tw-justify-around tw-text-base sm:tw-justify-start sm:tw-gap-8"
   >
-    <div v-for="(title, i) in titles" class="tw-py-2">
+    <div v-for="(title, i) in titles" class="tw-py-1">
       <a
         href="#"
         @click.prevent="$emit('scroll', selectors[i])"
@@ -16,10 +16,6 @@
 </template>
 
 <script>
-function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
 export default {
   name: "SectionLinks",
   props: ["selectedGeographyType"],
@@ -30,14 +26,7 @@ export default {
   },
   computed: {
     titles() {
-      if (this.$mq == "mobile")
-        return ["Indicators", "SPI Scores", "SPI Correlations"];
-      else
-        return [
-          `${capitalizeFirstLetter(this.selectedGeographyType)} Indicators`,
-          "The Philadelphia SPI",
-          "Economic Comparisons",
-        ];
+      return ["Indicators", "SPI Scores", "Citywide Trends"];
     },
   },
 };

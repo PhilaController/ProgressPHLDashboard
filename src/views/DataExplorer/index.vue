@@ -8,8 +8,15 @@
     class="tw-relative tw-flex tw-flex-col tw-text-lg lg:tw-h-screen"
     :style="getPaddingTop(controllerNavHeight)"
   >
+    <div
+      v-if="!mapLoaded"
+      class="tw-fixed tw-inset-0 tw-z-[10] tw-flex tw-h-screen tw-w-screen tw-bg-white/75"
+    ></div>
     <!-- Navbar -->
-    <navbar :height="navBarHeight" />
+    <navbar
+      :height="navBarHeight"
+      :selected-tracts="scorecardComparisonTracts"
+    />
 
     <!-- Main app -->
     <div
@@ -24,7 +31,7 @@
           ref="ExplorerMap"
           :data="data"
           :geojson="geojson"
-          :displayed-variable-name="metadata.aliases[mappedVariable]"
+          :displayed-variable="mappedVariable"
           :hierarchy="metadata.hierarchy"
           :aliases="metadata.aliases"
           :neighborhood-names="neighborhoodNames"
@@ -33,12 +40,16 @@
           :selected-geography-type="selectedGeographyType"
           :focused-ids="focusedIds"
           @geography:select="handleGeographySelection"
+          @geography:hover="hoveredId = $event"
+          @geography:unhover="hoveredId = null"
+          @update:map-variable="($event) => (mappedVariable = $event)"
+          @loaded="mapLoaded = true"
         />
       </div>
 
       <!-- Content -->
       <div
-        class="tw-w-full lg:tw-overflow-y-scroll tw-border-b-4 tw-border-stone-400/50 tw-pb-10 lg:tw-w-2/3"
+        class="tw-w-full tw-border-b-4 tw-border-stone-400/50 tw-pb-10 lg:tw-w-2/3 lg:tw-overflow-y-scroll"
         id="content-container"
       >
         <!-- Welcome Pane: No neighborhood selection  -->
@@ -63,12 +74,17 @@
           :metadata="metadata"
           :focused-ids="focusedIds"
           :hovered-id="hoveredId"
+          :scorecard-tracts="scorecardComparisonTracts"
+          @comparison:add="handleComparisonAdd"
+          @comparison:reset="handleComparisonReset"
+          @comparison:remove="handleComparisonRemove"
           @geography:reset="resetSelectedGeography"
           @geography:select="handleGeographySelection"
           @geography:highlight="highlightGeography"
           @geography:unhighlight="unHighlightGeography"
           @geography:hover="handleStripPlotMouseover"
           @geography:unhover="handleStripPlotMouseleave"
+          @update:map-variable="($event) => (mappedVariable = $event)"
         />
       </div>
     </div>
@@ -77,10 +93,10 @@
 
 <script>
 // Local
+import LoadingPage from "@/components/Loading/LoadingPage";
 import WelcomePane from "./Panes/WelcomePane";
 import SelectedGeographyPane from "./Panes/SelectedGeographyPane";
 import ExplorerMap from "./ExplorerMap.vue";
-import LoadingPage from "@/components/LoadingPage";
 import Navbar from "@/components/Navbar";
 
 // d3
@@ -132,6 +148,11 @@ export default {
   },
   data() {
     return {
+      /**
+       * Scorecard comparisons
+       */
+      scorecardComparisonTracts: [],
+
       /**
        * Is the map fully loaded?
        */
@@ -187,26 +208,6 @@ export default {
         let q = {};
         if (name) q[type] = name;
         this.$router.replace({ query: q });
-      }
-    },
-
-    /*
-      When the map is loaded, check query parameters
-    */
-    mapLoaded() {
-      if (this.tractUrlParam != undefined) {
-        this.$refs.mapComponent.setClickedId(this.tractUrlParam);
-      }
-    },
-
-    /*
-      When the tract is updated, update the URL query params
-    */
-    clickedTract(newValue, oldValue) {
-      if (newValue !== oldValue && this.$route.query.tract !== newValue) {
-        let query = {};
-        if (newValue) query = { tract: newValue };
-        this.$router.replace({ query: query });
       }
     },
   },
@@ -280,6 +281,33 @@ export default {
 
   methods: {
     /**
+     * Update comparison add
+     */
+    handleComparisonAdd(name) {
+      if (!name) name = this.selectedGeographyName;
+      if (!this.scorecardComparisonTracts.includes(name))
+        this.scorecardComparisonTracts.push(name);
+    },
+
+    /**
+     * Handle comparison reset
+     */
+    handleComparisonReset() {
+      console.log("HELLO");
+      this.scorecardComparisonTracts = [];
+    },
+
+    /**
+     * Update comparison remove
+     */
+    handleComparisonRemove(name) {
+      if (!name) name = this.selectedGeographyName;
+      this.scorecardComparisonTracts = this.scorecardComparisonTracts.filter(
+        (d) => d !== name
+      );
+    },
+
+    /**
      * Determine the padding to use
      */
     getPaddingTop(padding) {
@@ -301,14 +329,14 @@ export default {
      */
     handleStripPlotMouseover({ name, type }) {
       this.highlightGeography({ name, type });
-      this.hoveredId = this.getTractDataByName(name).geoid;
+      //this.hoveredId = this.getTractDataByName(name).geoid;
     },
 
     /**
      * Handle mouseleave event from a strip plot
      */
     handleStripPlotMouseleave() {
-      this.hoveredId = null;
+      //this.hoveredId = null;
       this.unHighlightGeography();
     },
 

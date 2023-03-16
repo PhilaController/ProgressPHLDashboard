@@ -32,8 +32,8 @@
       <div
         class="tw-ml-4 tw-flex tw-flex-col tw-justify-center tw-pb-1 tw-text-[1.2em] tw-text-[#0F7582] focus:tw-text-[#0F7582]"
       >
-        <i v-if="!isOpen" class="fas fa-caret-down"></i>
-        <i v-else class="fas fa-caret-up"></i>
+        <font-awesome-icon v-if="!isOpen" icon="fa-solid fa-caret-down" />
+        <font-awesome-icon v-else icon="fa-solid fa-caret-up" />
       </div>
     </button>
 

@@ -7,9 +7,12 @@
       :nav-bar-height="navBarHeight"
       :controller-nav-height="controllerNavHeight"
       :tract-features="tractFeatures"
+      :scorecard-tracts="scorecardTracts"
       @mounted="headerHeight = $event"
       @change:height="headerHeight = $event"
       @scroll="handleScroll"
+      @comparison:add="$emit('comparison:add')"
+      @comparison:remove="$emit('comparison:remove')"
       @geography:reset="$emit('geography:reset')"
       @geography:select="$emit('geography:select', $event)"
       @geography:highlight="$emit('geography:highlight', $event)"
@@ -17,19 +20,11 @@
     />
 
     <!-- Sections -->
-    <div class="tw-mt-10">
-      <!-- Top Summary Message -->
-      <top-message
-        class="tw-px-4 sm:tw-px-8"
-        :selected-geography-name="selectedGeographyName"
-        :selected-geography-type="selectedGeographyType"
-        :spi-data="data['social_progress_index']"
-      />
-
+    <div class="tw-mt-6">
       <!-- Indicators section -->
       <indicators-section
         id="indicators-section"
-        class="tw-mt-10 tw-px-4 sm:tw-px-8"
+        class="tw-mt-0 tw-px-4 sm:tw-px-8"
         :data="selectedCensusData"
         :selected-geography-name="selectedGeographyName"
         :selected-geography-type="selectedGeographyType"
@@ -38,7 +33,7 @@
       <!-- Strip plots -->
       <strip-plots-section
         id="spi-section"
-        class="tw-mt-20 tw-px-4 sm:tw-px-8"
+        class="tw-mt-14 tw-px-4 sm:tw-px-8"
         :selected-geography-name="selectedGeographyName"
         :selected-geography-type="selectedGeographyType"
         :selected-geography-size="selectedGeographySize"
@@ -49,6 +44,8 @@
         @geography:select="$emit('geography:select', $event)"
         @geography:hover="$emit('geography:hover', $event)"
         @geography:unhover="$emit('geography:unhover')"
+        @update:map-variable="$emit('update:map-variable', $event)"
+        @scroll="handleScroll"
       />
 
       <!-- Trends -->
@@ -60,9 +57,13 @@
         :data="data"
         :metadata="metadata"
         :focused-ids="focusedIds"
+        :scorecard-tracts="scorecardTracts"
         @geography:select="$emit('geography:select', $event)"
         @geography:hover="$emit('geography:hover', $event)"
         @geography:unhover="$emit('geography:unhover')"
+        @comparison:add="$emit('comparison:add', $event)"
+        @comparison:remove="$emit('comparison:remove', $event)"
+        @comparison:reset="$emit('comparison:reset')"
       />
     </div>
   </div>
@@ -71,7 +72,6 @@
 <script>
 // Local
 import GeographyHeader from "./GeographyHeader";
-import TopMessage from "./TopMessage";
 import IndicatorsSection from "./Sections/Indicators";
 import StripPlotsSection from "./Sections/StripPlots";
 import TrendsSection from "./Sections/Trends";
@@ -131,10 +131,14 @@ export default {
      * GEOID of hovered tract
      */
     hoveredId: { type: String },
+
+    /**
+     * Names of tracts selected for scorecard page
+     */
+    scorecardTracts: { type: Array },
   },
   components: {
     GeographyHeader,
-    TopMessage,
     IndicatorsSection,
     StripPlotsSection,
     TrendsSection,
@@ -225,7 +229,7 @@ export default {
         let scrollTop = scrollOffset - (this.headerHeight - this.navBarHeight);
 
         // Scroll!
-        scrollableContainer.scrollTop = scrollTop - 20;
+        scrollableContainer.scrollTop = scrollTop - 10;
       }
     },
   },

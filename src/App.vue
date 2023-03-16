@@ -17,9 +17,10 @@ import { queryFeatureServer } from "@/utils";
 import { json } from "d3-fetch";
 import $ from "jquery";
 
+const VERSION = "2";
 const ARCGIS_URL =
   "https://services.arcgis.com/fLeGjb7u4uXqeF9q/arcgis/rest/services";
-const S3_URL = "https://spi-dashboard-data.s3.amazonaws.com/v1/";
+const S3_URL = `https://spi-dashboard-data.s3.amazonaws.com/v${VERSION}/`;
 
 export default {
   name: "App",
@@ -141,60 +142,3 @@ export default {
   },
 };
 </script>
-
-<style>
-@import "~maplibre-gl/dist/maplibre-gl.css";
-
-.site-subheader {
-  display: none !important;
-}
-
-/* Text content */
-@media (min-width: 576px) {
-  .text-content {
-    max-width: 540px;
-  }
-}
-@media (min-width: 768px) {
-  .text-content {
-    max-width: 720px;
-  }
-}
-@media (min-width: 992px) {
-  .text-content {
-    max-width: 960px;
-  }
-}
-@media (min-width: 1200px) {
-  .text-content {
-    max-width: 1140px;
-  }
-}
-.text-content {
-  width: 100%;
-  padding-right: 15px;
-  padding-left: 15px;
-  margin-right: auto;
-  margin-left: auto;
-  text-align: left;
-}
-
-/* App-wide settings */
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  min-height: 100vh;
-}
-/* Hide the social share */
-.addthis-smartlayers {
-  display: none !important;
-}
-/* Help message */
-.help-message {
-  font-weight: normal !important;
-  padding-bottom: 1rem;
-}
-
-.v-popper--theme-tooltip {
-  max-width: 300px !important;
-}
-</style>

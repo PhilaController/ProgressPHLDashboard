@@ -1,11 +1,21 @@
 <template>
   <div class="tw-flex tw-h-full tw-w-full tw-flex-col">
+    <!--Scorecard modal -->
+    <scorecard-popup
+      :showing="modalShowing"
+      @close="modalShowing = false"
+      :metadata="metadata"
+      :data="data"
+      :variable="scorecardValue"
+      :tract-name="selectedGeographyName"
+    />
+
     <!-- Title-->
     <div
       class="tw-flex tw-items-end tw-border-b tw-border-stone-300 tw-pb-1 tw-leading-none"
     >
       <!-- SPI Logo -->
-      <div class="tw-flex tw-h-[30px] tw-w-[30px] tw-items-end tw-pb-0.5">
+      <div class="tw-flex tw-h-[30px] tw-w-[30px] tw-items-end tw-pb-1">
         <div
           class="tw-mx-[1px] tw-h-1/3 tw-flex-grow tw-border tw-border-green-500 tw-bg-green-300"
         ></div>
@@ -16,13 +26,7 @@
           class="tw-mx-[1px] tw-h-full tw-flex-grow tw-border tw-border-cyan-500 tw-bg-cyan-300"
         ></div>
       </div>
-      <div class="tw-ml-2 tw-text-2xl tw-font-bold">
-        {{
-          $mq === "mobile"
-            ? "The Philadelphia SPI"
-            : "Philadelphia Social Progress Scores"
-        }}
-      </div>
+      <div class="tw-ml-2 tw-text-2xl tw-font-bold">Social Progress Scores</div>
     </div>
 
     <!-- Intro text -->
@@ -30,12 +34,25 @@
       <p>
         This section shows the SPI scores for each of the city's 372 populated
         neighborhood tracts, with each circle representing the score for one
-        tract.
+        tract. A tract's SPI score is the average of its scores for the
+        <template v-for="(name, i) in dimensionNames">
+          <span v-if="i !== 0">, </span>
+          <span v-if="i === dimensionNames.length - 1"> and </span>
+          <span class="tw-font-medium" :class="getTextColorByDimension(name)">{{
+            metadata.aliases[name]
+          }}</span>
+        </template>
+        dimensions. The score for each dimension is the average of four
+        component scores.
+      </p>
+
+      <!-- Subheader -->
+      <p class="tw-mt-4">
         <template v-if="selectedGeographyType == 'tract'">
           In the charts below, the score for the
           <span class="tw-font-medium">{{ selectedGeographyName }}</span>
-          tract is selected. To view data for a different tract, hover over and
-          click on a specific circle.
+          tract is selected. To view data for a different tract, click on a
+          specific circle.
         </template>
         <template v-else>
           In the charts below, the scores for
@@ -44,138 +61,88 @@
           <span class="tw-font-medium"
             >{{ selectedGeographyName }} {{ selectedGeographyType }}</span
           >
-          are highlighted. To view data for an individual tract, hover over and
-          click on a specific circle.
+          are highlighted. To view data for an individual tract, click on a
+          specific circle.
         </template>
+        You can also hover over a tract in the map to see its data highlighted
+        in the charts below.
+      </p>
+
+      <p class="tw-mt-4">
+        Use the
+        <span class="tw-inline tw-text-sm tw-text-gray-400"
+          ><i class="fas fa-info-circle"></i
+        ></span>
+        icon to see a variable's definition, the
+        <span class="tw-inline tw-text-sm tw-text-gray-400"
+          ><i class="far fa-eye"></i
+        ></span>
+        icon to show the variable on the map, and the
+        <span class="tw-inline tw-text-sm tw-text-gray-400"
+          ><i class="fas fa-table"></i
+        ></span>
+        icon to show a variable's underlying data indicators.
       </p>
     </div>
 
     <!-- Charts part -->
-    <div class="tw-relative" id="strip-plots-container">
-      <!-- 1. SPI Chart-->
-      <div class="tw-mt-8 tw-flex tw-items-center" id="spi_header">
-        <div class="tw-text-xl tw-font-bold">
+    <div
+      class="tw-relative tw-mt-10 tw-grid tw-grid-cols-2 tw-gap-0"
+      id="strip-plots-container"
+    >
+      <!-- SPI: Header -->
+      <div class="tw-flex tw-flex-col tw-pl-4" id="spi_header">
+        <div class="tw-text-lg tw-font-semibold">
           {{ metadata.aliases["social_progress_index"] }}
         </div>
-
-        <!-- More options icon -->
-        <icon-dropdown
-          class="ml-2 tw-flex tw-items-center"
-          :options="['Show All Components', 'Hide All Components']"
-          :option-callbacks="[
-            () => dimensionNames.map((d) => expandDimension(d)),
-            () => dimensionNames.map((d) => collapseDimension(d)),
-          ]"
-        >
-          <i
-            class="fas fa-ellipsis-h tw-text-xl tw-text-gray-400 hover:tw-cursor-pointer hover:tw-text-gray-600"
-          ></i>
-        </icon-dropdown>
       </div>
-      <div class="tw-mt-0.5 tw-text-sm">
-        A tract's SPI score is the average of its scores for the
-        <template v-for="(name, i) in dimensionNames">
-          <span v-if="i !== 0">, </span>
-          <span v-if="i === dimensionNames.length - 1"> and </span>
-          <span class="tw-font-medium" :class="getTextColorByDimension(name)">{{
-            metadata.aliases[name]
-          }}</span>
-        </template>
-        dimensions.
-      </div>
-      <strip-plot
-        class="tw-mt-4"
-        :data="data['social_progress_index']"
-        :title="metadata.aliases['social_progress_index']"
-        :focused-ids="focusedIds"
-        :hovered-id="hoveredId"
-        @click="$emit('geography:select', $event)"
-        @mouseover="$emit('geography:hover', $event)"
-        @mouseleave="$emit('geography:unhover')"
-      />
 
-      <!-- Loop over dimensions -->
-      <div
-        v-for="(dimension, i) in dimensionNames"
-        :key="dimension"
-        class="tw-mt-2 tw-flex tw-w-full tw-flex-col tw-border-l-2 tw-pl-4"
-        :class="getBorderColorByDimension(dimension)"
-      >
-        <!-- Dimension Header -->
-        <div class="tw-flex">
-          <div class="tw-text-lg tw-font-bold" :id="`${dimension}_header`">
-            Dimension #{{ i + 1 }}:
-            {{ metadata.aliases[dimension] }}
-          </div>
-
-          <!-- More options icon -->
-          <icon-dropdown
-            class="ml-2 tw-flex tw-items-center"
-            :options="getMoreOptions(dimension)"
-            :option-callbacks="getMoreOptionsCallbacks(dimension)"
-          >
-            <i
-              class="fas fa-ellipsis-h tw-text-xl tw-text-gray-400 hover:tw-cursor-pointer hover:tw-text-gray-600"
-            ></i>
-          </icon-dropdown>
-        </div>
-
-        <!-- Subheader -->
-        <div class="tw-mt-0.5 tw-text-sm">
-          <p>
-            This dimension addresses the following question:
-            <span class="tw-italic">{{ questions[dimension] }}</span>
-          </p>
-          <p class="tw-mt-4">
-            A tract's score for this dimension is an average of its four
-            component scores:
-            <span v-html="getComponentList(dimension)"></span>. To see component
-            scores, click on the
-            <i class="fas fa-ellipsis-h tw-ml-1 tw-mr-1 tw-text-gray-500"></i>
-            button above.
-          </p>
-        </div>
-
-        <!-- Chart -->
+      <!-- SPI: Chart -->
+      <div class="tw-ml-2">
         <strip-plot
-          class="tw-mt-4"
-          :data="data[dimension]"
-          :title="metadata.aliases[dimension]"
+          :data="data['social_progress_index']"
+          :title="metadata.aliases['social_progress_index']"
           :focused-ids="focusedIds"
           :hovered-id="hoveredId"
+          :add-axis-labels="true"
           @click="$emit('geography:select', $event)"
           @mouseover="$emit('geography:hover', $event)"
           @mouseleave="$emit('geography:unhover')"
         />
+      </div>
 
-        <!-- Loop over components -->
+      <!-- Dimensions -->
+      <template v-for="dimension in dimensionNames">
+        <!-- Dimension Header -->
         <div
-          v-for="(component, j) in metadata.hierarchy[dimension]"
-          :key="component"
-          class="tw-mt-4 tw-flex tw-w-full tw-flex-col tw-border-l-2 tw-pl-4"
-          :class="getComponentClasses(dimension)"
+          class="tw-mt-6 tw-flex tw-w-full tw-flex-col tw-border-l-2 tw-pl-4"
+          :class="getBorderColorByDimension(dimension)"
         >
-          <div class="tw-flex tw-items-center">
-            <div class="tw-text-base tw-font-bold" :id="`${component}_header`">
-              Component #{{ j + 1 }}:
-              {{ metadata.aliases[component] }}
-            </div>
+          <div
+            class="tw-text-base tw-font-semibold"
+            :id="`${dimension}_header`"
+          >
+            {{ metadata.aliases[dimension] }}
           </div>
 
-          <div class="tw-mt-0.5 tw-text-sm">
-            <router-link
-              class="tw-font-medium tw-text-[#0F7582]/80 visited:tw-text-[#0F7582]/80 hover:tw-cursor-pointer hover:tw-text-[#0F7582] focus:tw-outline-none"
-              :title="`Go to the definition for the '${metadata.aliases[component]}' component`"
-              :to="`/definitions?value=${component}`"
-              >The definition</router-link
-            >
-            {{ componentDescriptions[component] }}
-          </div>
+          <options-menu
+            :variable="dimension"
+            :selected-geography-type="selectedGeographyType"
+            @update:map-variable="$emit('update:map-variable', $event)"
+            @scorecard="
+              {
+                scorecardValue = $event;
+                modalShowing = true;
+              }
+            "
+          />
+        </div>
 
+        <!-- Chart -->
+        <div class="tw-mt-6 tw-ml-2">
           <strip-plot
-            class="tw-mt-4 tw-flex-grow"
-            :data="data[component]"
-            :title="metadata.aliases[component]"
+            :data="data[dimension]"
+            :title="metadata.aliases[dimension]"
             :focused-ids="focusedIds"
             :hovered-id="hoveredId"
             @click="$emit('geography:select', $event)"
@@ -183,14 +150,62 @@
             @mouseleave="$emit('geography:unhover')"
           />
         </div>
-      </div>
+
+        <!-- Components -->
+        <template v-for="component in metadata.hierarchy[dimension]">
+          <!-- Dimension Header -->
+          <div
+            class="tw-flex tw-w-full tw-max-w-[250px] tw-flex-row tw-border-l-2 tw-pl-3"
+            :class="getBorderColorByDimension(dimension)"
+          >
+            <div
+              class="tw-w-1 tw-border-l-2 tw-pl-0.5"
+              :class="getBorderColorByDimension(dimension)"
+            ></div>
+            <div class="tw-ml-2 tw-flex tw-flex-col">
+              <div
+                class="tw-text-sm tw-leading-tight"
+                :id="`${component}_header`"
+              >
+                {{ metadata.aliases[component] }}
+              </div>
+
+              <options-menu
+                :variable="component"
+                :selected-geography-type="selectedGeographyType"
+                @update:map-variable="$emit('update:map-variable', $event)"
+                @scorecard="
+                  {
+                    scorecardValue = $event;
+                    modalShowing = true;
+                  }
+                "
+              />
+            </div>
+          </div>
+
+          <!-- Chart -->
+          <div class="tw-ml-2 tw-pt-1">
+            <strip-plot
+              :data="data[component]"
+              :title="metadata.aliases[component]"
+              :focused-ids="focusedIds"
+              :hovered-id="hoveredId"
+              @click="$emit('geography:select', $event)"
+              @mouseover="$emit('geography:hover', $event)"
+              @mouseleave="$emit('geography:unhover')"
+            />
+          </div>
+        </template>
+      </template>
     </div>
   </div>
 </template>
 
 <script>
 import StripPlot from "./StripPlot";
-import IconDropdown from "@/components/IconDropdown";
+import OptionsMenu from "./OptionsMenu";
+import ScorecardPopup from "./ScorecardPopup";
 
 export default {
   name: "StripPlotsSection",
@@ -230,9 +245,15 @@ export default {
      */
     selectedGeographySize: { type: Number, required: true },
   },
-  components: { StripPlot, IconDropdown },
+  components: {
+    StripPlot,
+    OptionsMenu,
+    ScorecardPopup,
+  },
   data() {
     return {
+      modalShowing: false,
+      scorecardValue: null,
       /**
        * Variable names for dimensions
        */
@@ -392,3 +413,16 @@ export default {
   },
 };
 </script>
+
+<style>
+#strip-plots-container {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+. {
+  grid-area: ;
+}
+. {
+  grid-area: ;
+}
+</style>

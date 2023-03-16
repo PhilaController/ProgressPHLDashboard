@@ -27,7 +27,7 @@
       class="tw-relative tw-h-full tw-w-full tw-rounded-b-md tw-border tw-border-neutral-300"
     >
       <svg
-        class="tw-pointer-events-none tw-absolute tw-top-0 tw-left-0 tw-z-[7]"
+        class="tw-pointer-events-none tw-absolute tw-top-0 tw-left-0 tw-z-[6]"
         height="100%"
         width="100%"
         viewBox="0 0 1280 720"
@@ -178,24 +178,64 @@ function getSVGPoint(svg, elem, orientation, dx = 4) {
 
 export default {
   name: "DefinitionsTable",
-  props: ["isLoading", "hierarchy", "definitions", "aliases", "dimensionNames"],
+  props: {
+
+    /**
+     * Is the data for this page loaded
+     */
+    isLoading: { type: Boolean, required: true },
+
+    /**
+     * Mapping from variable to its components
+     */
+    hierarchy: { type: Object, required: true },
+
+    /**
+     * Definitions for each variable
+     */
+    definitions: { type: Object, required: true },
+
+    /**
+     * Aliases for each variable
+     */
+    aliases: { type: Object, required: true },
+  },
   data() {
     return {
+      // Main columns of table
       headers: ["components", "indicators", "definition"],
+
+      // Main dimension names
+      dimensionNames: [
+        "basic_human_needs",
+        "foundations_of_wellbeing",
+        "opportunity",
+      ],
+
+      // Track the selected dimension/component/indicator
       dimension: null,
       component: null,
       indicator: null,
     };
   },
   created() {
+    // If loaded, initialize the table
     if (!this.isLoading) {
       this.initialize();
     }
   },
+
   watch: {
+    /**
+     * When loading finishes, initialize the table
+     */
     isLoading() {
       this.initialize();
     },
+
+    /**
+     * If dimension changes, emit and remove links
+     */
     dimension(newValue) {
       this.$emit("dimension", newValue);
 
@@ -207,7 +247,11 @@ export default {
       svg.selectAll(".indicator-link").remove();
       svg.selectAll(".definition-link").remove();
     },
-    component(newValue, oldValue) {
+
+    /**
+     * If component changes, remove/add links
+     */
+    component(newValue) {
       // Do nothing on mobile
       if (this.$mq === "mobile") return;
 
@@ -217,15 +261,17 @@ export default {
         this.addIndicatorLinks(newValue);
       }
     },
-    indicator(newValue, oldValue) {
+
+    /**
+     * If indicator changes, remove/add links
+     */
+    indicator(newValue) {
       // Do nothing on mobile
       if (this.$mq === "mobile") return;
 
       if (newValue != null) {
-        //
-        let svg = select(this.$el).select("svg");
-
         // Add component --> indicator links
+        let svg = select(this.$el).select("svg");
         svg.selectAll(".indicator-link").remove();
         this.addIndicatorLinks(this.component);
 
@@ -236,6 +282,9 @@ export default {
     },
   },
   computed: {
+    /**
+     * The message for the selection dimension
+     */
     dimensionMessage() {
       if (this.dimension == "basic_human_needs")
         return "Are people's most essential needs being met?";
@@ -355,7 +404,6 @@ export default {
       Add links from component to indicator
     */
     addIndicatorLinks(component) {
-      console.log("ADDING indicator links", component);
       let id_selector = `#component_${component}`;
       waitForElm(id_selector).then((elem) => {
         // Get the svg

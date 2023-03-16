@@ -21,10 +21,16 @@ import "floating-vue/dist/style.css";
 
 // Fontawesome
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import {
+  FontAwesomeIcon,
+  FontAwesomeLayers,
+  FontAwesomeLayersText,
+} from "@fortawesome/vue-fontawesome";
 import {
   faAngleDown,
   faAngleUp,
+  faCaretDown,
+  faCaretUp,
   faAngleRight,
   faSquarePlus,
   faCalculator,
@@ -42,6 +48,8 @@ import {
 
 /* add icons to the library */
 library.add(
+  faCaretDown,
+  faCaretUp,
   faAngleDown,
   faAngleUp,
   faAngleRight,
@@ -61,6 +69,8 @@ library.add(
 
 /* add font awesome icon component */
 Vue.component("font-awesome-icon", FontAwesomeIcon);
+Vue.component("font-awesome-layers", FontAwesomeLayers);
+Vue.component("font-awesome-layers-text", FontAwesomeLayersText);
 
 // Set up scroll to
 let VueScrollTo = require("vue-scrollto");

@@ -139,7 +139,7 @@
 
 <script>
 // Local
-import LoadingOverlay from "@/components/LoadingOverlay";
+import LoadingOverlay from "@/components/Loading/LoadingOverlay";
 import RaceEthnicityChart from "./RaceEthnicityChart";
 import AgeSexChart from "./AgeSexChart";
 
@@ -174,7 +174,7 @@ export default {
   },
   computed: {
     title() {
-      return capitalizeFirstLetter(this.selectedGeographyType) + " Indicators";
+      return "Indicators"; //capitalizeFirstLetter(this.selectedGeographyType) + " Indicators";
     },
     population_2010() {
       return this.getVariable("population_2010");

@@ -6,39 +6,23 @@
   >
     <!-- Header -->
     <div
-      class="tw-mt-4 tw-mb-1 tw-flex tw-flex-col tw-px-4 tw-text-3xl sm:tw-flex-row sm:tw-items-end sm:tw-px-8 lg:tw-mt-0"
+      class="tw-mt-4 tw-flex tw-flex-col tw-px-4 tw-text-3xl sm:tw-flex-row sm:tw-items-end sm:tw-px-8 lg:tw-mt-0"
     >
-      <div class="tw-font-bold">
-        <a
-          class="visited:tw-text-inherit hover:tw-text-inherit focus:tw-outline-none"
-          href="#"
-          @click.prevent="$emit('scroll')"
-          @keydown.enter.prevent="$emit('scroll')"
-          @keydown.space.prevent="$emit('scroll')"
-          >{{ selectedGeographyName }}</a
-        >
+      <div class="tw-font-semibold">
+        <span class="tw-mr-3 tw-text-2xl"><i class="fas fa-map-pin"></i></span
+        >{{ selectedGeographyName }}
       </div>
       <div
-        class="tw-mt-1 tw-text-xl tw-font-semibold tw-uppercase tw-text-gray-400 sm:tw-mt-0 sm:tw-ml-2"
+        class="tw-mt-1 tw-flex tw-text-xl tw-font-semibold tw-uppercase tw-text-gray-400 sm:tw-mt-0 sm:tw-ml-2"
       >
         {{ selectedGeographyType }}
-        <span
-          class="tw-ml-1.5 tw-text-[1em] tw-text-gray-400 hover:tw-cursor-pointer hover:tw-text-gray-600"
-          title="Reset the selected geography"
-          role="button"
-          tabindex="0"
-          @click.prevent="$emit('geography:reset')"
-          @keydown.enter.prevent="$emit('geography:reset')"
-          @keydown.space.prevent="$emit('geography:reset')"
-        >
-          <i class="fas fa-times-circle"></i>
-        </span>
       </div>
     </div>
 
     <!-- Neighborhood Subheader -->
     <neighborhood-subheader
       v-if="selectedGeographyType == 'neighborhood'"
+      class="tw-mb-2"
       :name="selectedGeographyName"
       :neighborhood-size="neighborhoodSizes.get(selectedGeographyName)"
       :regions="hoodsToRegions[selectedGeographyName]"
@@ -50,6 +34,7 @@
     <!-- Tract subheader -->
     <tract-subheader
       v-else-if="selectedGeographyType == 'tract'"
+      class="tw-mb-2"
       :data="getTractData(selectedGeographyName)"
       @geography:select="$emit('geography:select', $event)"
       @geography:highlight="$emit('geography:highlight', $event)"
@@ -59,6 +44,7 @@
     <!-- Region subheader -->
     <region-subheader
       v-else-if="selectedGeographyType == 'region'"
+      class="tw-mb-2"
       :neighborhoods="regionsToHoods[selectedGeographyName]"
       @geography:select="$emit('geography:select', $event)"
       @geography:highlight="$emit('geography:highlight', $event)"
@@ -66,24 +52,102 @@
     />
 
     <!-- Section links -->
-    <section-links
-      @scroll="$emit('scroll', $event)"
-      :selected-geography-type="selectedGeographyType"
-      v-if="$mq !== 'mobile'"
-    />
-    <div v-else class="tw-mb-4"></div>
+    <div
+      class="tw-flex tw-w-full tw-items-end tw-justify-between tw-bg-stone-100/25 tw-pl-4 tw-pr-4 sm:tw-pl-8"
+    >
+      <!-- Links -->
+      <section-links
+        @scroll="$emit('scroll', $event)"
+        :selected-geography-type="selectedGeographyType"
+        v-if="$mq !== 'mobile'"
+      />
+
+      <!-- Buttons -->
+      <div class="tw-flex tw-items-center">
+        <!-- Reset -->
+        <div class="tw-mr-2 tw-flex tw-flex-col">
+          <div
+            class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-gray-400"
+          >
+            Reset
+          </div>
+
+          <div class="tw-flex tw-flex-row tw-items-center tw-text-lg">
+            <span class="tw-mr-2"><i class="fas fa-map-pin"></i></span>
+            <span
+              class="tw-text-[#0F7582]/75 hover:tw-cursor-pointer hover:tw-text-[#0F7582]"
+              title="Reset the selected geography"
+              role="button"
+              tabindex="0"
+              @click.prevent="$emit('geography:reset')"
+              @keydown.enter.prevent="$emit('geography:reset')"
+              @keydown.space.prevent="$emit('geography:reset')"
+            >
+              <i class="fas fa-times-circle"></i>
+            </span>
+          </div>
+        </div>
+
+        <div
+          v-if="selectedGeographyType == 'tract'"
+          class="tw-flex- tw-flex-col tw-border-l-2 tw-border-gray-300 tw-pl-2"
+        >
+          <!-- Header -->
+          <div
+            class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-gray-400"
+          >
+            Compare
+          </div>
+
+          <div class="tw-flex tw-flex-row tw-text-lg">
+            <span class="tw-mr-2"><i class="fas fa-table"></i></span>
+            <span
+              class="tw-text-[#0F7582]/75 hover:tw-cursor-pointer hover:tw-text-[#0F7582]"
+              :class="{
+                disabled: isDisabled('plus'),
+              }"
+              title="Add to scorecard comparison"
+              role="button"
+              tabindex="0"
+              @click.prevent="handlePlusClick"
+              @keydown.enter.prevent="handlePlusClick"
+              @keydown.space.prevent="handlePlusClick"
+            >
+              <i class="fas fa-plus-circle"></i>
+            </span>
+            <span
+              class="tw-ml-0.5 tw-text-[#0F7582]/75 hover:tw-cursor-pointer hover:tw-text-[#0F7582]"
+              :class="{
+                disabled: isDisabled('minus'),
+              }"
+              title="Remove from scorecard comparison"
+              role="button"
+              tabindex="0"
+              @click.prevent="handleMinusClick"
+              @keydown.enter.prevent="handleMinusClick"
+              @keydown.space.prevent="handleMinusClick"
+            >
+              <i class="fas fa-minus-circle"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- <div v-else class="tw-mb-4"></div> -->
   </div>
 </template>
 
 <script>
-import { regionsToHoods, hoodsToRegions } from "@/data";
-
 import SectionLinks from "./SectionLinks";
 import NeighborhoodSubheader from "./Subheaders/Neighborhood";
 import TractSubheader from "./Subheaders/Tract";
 import RegionSubheader from "./Subheaders/Region";
 
 import { rollup, max } from "d3-array";
+
+// Load crosswalks
+const regionsToHoods = require("@/data/regionsToHoods")
+const hoodsToRegions = require("@/data/hoodsToRegions")
 
 export default {
   name: "GeographyHeader",
@@ -112,6 +176,11 @@ export default {
      * Census tract features
      */
     tractFeatures: { type: Array, required: true },
+
+    /**
+     * Names of tracts selected for scorecard page
+     */
+    scorecardTracts: { type: Array },
   },
   components: {
     NeighborhoodSubheader,
@@ -171,6 +240,25 @@ export default {
     },
   },
   methods: {
+    handlePlusClick() {
+      if (!this.isDisabled("plus")) this.$emit("comparison:add");
+    },
+    handleMinusClick() {
+      if (!this.isDisabled("minus")) this.$emit("comparison:remove");
+    },
+    isDisabled(kind) {
+      if (kind === "minus")
+        return (
+          this.scorecardTracts === undefined ||
+          !this.scorecardTracts.includes(this.selectedGeographyName)
+        );
+      else
+        return (
+          this.scorecardTracts !== undefined &&
+          (this.scorecardTracts.length == 2 ||
+            this.scorecardTracts.includes(this.selectedGeographyName))
+        );
+    },
     /**
      * Return the properties for the tract feature with the input name
      */
@@ -184,3 +272,14 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+span.disabled,
+span.disabled:hover,
+span.disabled:active,
+span.disabled:focus {
+  opacity: 25%;
+  cursor: not-allowed;
+  color: #0f7582;
+}
+</style>

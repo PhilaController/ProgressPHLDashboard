@@ -1,8 +1,11 @@
 import Vue from "vue";
 import Router from "vue-router";
+
+// Pages
 import LandingPage from "@/views/LandingPage";
 import AboutPage from "@/views/AboutPage";
-// import Scorecard from "@/views/Scorecard";
+// import ScorecardSummary from "@/views/Scorecards/SummaryPage";
+// import ScorecardComparison from "@/views/Scorecards/ScorecardComparison";
 import DataExplorer from "@/views/DataExplorer";
 import DataDefinitions from "@/views/DataDefinitions";
 
@@ -15,8 +18,16 @@ export default new Router({
     { path: "/explorer", component: DataExplorer },
     { path: "/definitions", component: DataDefinitions },
     // {
-    //   path: "/scorecard/",
-    //   component: Scorecard,
+    //   path: "/scorecards/",
+    //   component: ScorecardSummary,
+    // },
+    // {
+    //   path: "/scorecards/:tract1/:tract2",
+    //   component: ScorecardComparison,
+    // },
+    // {
+    //   path: "/scorecards/:tract1",
+    //   component: ScorecardComparison,
     // },
   ],
   scrollBehavior(to, from) {

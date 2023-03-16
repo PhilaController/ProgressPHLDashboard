@@ -1,20 +1,13 @@
 <template>
-  <!-- Show a loader -->
-  <loading-page v-if="isLoading" />
-
-  <!-- If data is loaded, show the definitions content -->
-  <div
-    v-else
-    class="tw-relative tw-flex tw-flex-col"
-    :style="getPaddingTop(controllerNavHeight)"
+  <content-wrapper
+    :controller-nav-height="controllerNavHeight"
+    :use-padding="usePadding"
+    :nav-bar-height="navBarHeight"
+    :is-loading="isLoading"
   >
-    <!-- Navbar -->
-    <navbar :height="navBarHeight" />
-
-    <!-- The top section -->
     <div
+      v-if="!isLoading"
       class="tw-relative tw-mx-auto tw-w-full tw-max-w-5xl tw-pb-10 sm:tw-px-4"
-      :style="getPaddingTop(navBarHeight)"
     >
       <!-- Overlay -->
       <loading-overlay v-if="!mapLoaded" />
@@ -25,7 +18,6 @@
         :hierarchy="metadata.hierarchy"
         :aliases="metadata.aliases"
         :definitions="metadata.definitions"
-        :dimension-names="dimensionNames"
         :is-loading="isLoading"
         @dimension="selectedDimension = $event"
       />
@@ -40,47 +32,70 @@
         :hierarchy="metadata.hierarchy"
         :definitions="metadata.definitions"
         :geojson="geojson"
-        :selected-variable="metadata.aliases[selectedVariable]"
+        :selected-variable="selectedVariable"
         :selected-dimension="selectedDimension"
         @loaded="mapLoaded = true"
       />
     </div>
-  </div>
+  </content-wrapper>
 </template>
 
 <script>
-import LoadingPage from "@/components/LoadingPage";
-import Navbar from "@/components/Navbar";
-import LoadingOverlay from "@/components/LoadingOverlay";
+import ContentWrapper from "@/components/ContentWrapper";
+import LoadingOverlay from "@/components/Loading/LoadingOverlay";
 import DefinitionsTable from "./DefinitionsTable";
 import IndicatorMap from "./IndicatorMap";
 
 export default {
   name: "DataDefinitions",
-  props: [
-    "metadata",
-    "data",
-    "geojson",
-    "controllerNavHeight",
-    "navBarHeight",
-    "usePadding",
-  ],
+  props: {
+    /**
+     * The height of the ProgressPHL navbar in pixels
+     */
+    navBarHeight: { type: Number },
+
+    /**
+     * The height of the controller.phila.gov navbar in pixels
+     */
+    controllerNavHeight: { type: Number },
+
+    /**
+     * Do we need top padding
+     */
+    usePadding: { type: Boolean },
+
+    /**
+     * The geojson collections
+     */
+    geojson: { type: Object },
+
+    /**
+     * SPI data
+     */
+    data: { type: Object },
+
+    /**
+     * Metadata for SPI
+     */
+    metadata: { type: Object },
+  },
   components: {
-    LoadingPage,
-    Navbar,
+    LoadingOverlay,
+    ContentWrapper,
     DefinitionsTable,
     IndicatorMap,
-    LoadingOverlay,
   },
   data() {
     return {
+      /**
+       * Has the map fully loaded?
+       */
       mapLoaded: false,
+
+      /**
+       * The currently selected dimension, which sets the colormap
+       */
       selectedDimension: null,
-      dimensionNames: [
-        "basic_human_needs",
-        "foundations_of_wellbeing",
-        "opportunity",
-      ],
     };
   },
 
@@ -90,12 +105,6 @@ export default {
     },
     isLoading() {
       return this.metadata == null || this.data == null || this.geojson == null;
-    },
-  },
-  methods: {
-    getPaddingTop(padding) {
-      if (this.usePadding) return `padding-top: ${padding}px`;
-      else return "";
     },
   },
 };

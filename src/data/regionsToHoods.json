@@ -1,0 +1,87 @@
+{
+  "East": {
+    "All": ["Juniata Park-Harrowgate", "Lower Kensington", "Upper Kensington"],
+    "Most": ["Hunting Park-Fairhill", "Richmond-Bridesburg"],
+    "Some": ["Nicetown-Tioga", "Northern Liberties-West Kensington"]
+  },
+  "Far Northeast": {
+    "All": [
+      "Bustleton",
+      "Somerton",
+      "Torresdale North",
+      "Torresdale South-Pennypack Park"
+    ],
+    "Most": [],
+    "Some": []
+  },
+  "Greater Center City": {
+    "All": ["Center City East", "Center City West", "Fairmount-Spring Garden"],
+    "Most": ["Pennsport-Queen Village"],
+    "Some": [
+      "Northern Liberties-West Kensington",
+      "Poplar-Temple",
+      "Schuylkill-Point Breeze",
+      "Southwark-Bella Vista"
+    ]
+  },
+  "Lower North": {
+    "All": ["Sharswood-Stanton", "Strawberry Mansion"],
+    "Most": ["Nicetown-Tioga", "Poplar-Temple"],
+    "Some": ["Hunting Park-Fairhill"]
+  },
+  "Lower Northeast (East)": {
+    "All": ["Frankford", "Wissinoming-Tacony"],
+    "Most": ["Mayfair-Holmesburg"],
+    "Some": ["Lawndale-Crescentville", "Richmond-Bridesburg"]
+  },
+  "Lower Northeast (West)": {
+    "All": ["Oxford Circle", "Rhawnhurst-Fox Chase"],
+    "Most": ["Lawndale-Crescentville"],
+    "Some": ["Mayfair-Holmesburg"]
+  },
+  "Northwest": {
+    "All": [
+      "Chestnut Hill-West Mt. Airy",
+      "East Falls-Westside",
+      "East Mt. Airy",
+      "Germantown",
+      "Roxborough-Manayunk"
+    ],
+    "Most": [],
+    "Some": []
+  },
+  "South": {
+    "All": [
+      "Grays Ferry-Passyunk",
+      "Snyder-Whitman",
+      "South Broad-Girard Estates"
+    ],
+    "Most": ["Southwark-Bella Vista"],
+    "Some": ["Pennsport-Queen Village", "Schuylkill-Point Breeze"]
+  },
+  "Southwest": {
+    "All": ["Cobbs Creek", "Eastwick-Elmwood", "Paschall-Kingsessing"],
+    "Most": ["University City"],
+    "Some": []
+  },
+  "Upper North": {
+    "All": [
+      "Logan",
+      "Oak Lane-Fernrock",
+      "Ogontz",
+      "Olney-Feltonville",
+      "West Oak Lane-Cedarbrook"
+    ],
+    "Some": ["Hunting Park-Fairhill"],
+    "Most": []
+  },
+  "West": {
+    "All": [
+      "Haddington-Overbrook",
+      "Mill Creek-Parkside",
+      "Overbrook Park-Wynnefield Heights"
+    ],
+    "Some": ["University City"],
+    "Most": []
+  }
+}

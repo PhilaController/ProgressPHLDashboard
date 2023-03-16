@@ -10,11 +10,9 @@
         </div>
 
         <p class="tw-mt-10 tw-text-xl">
-          Using data for the
-          <span class="tw-font-medium"
-            >Philadelphia Social Progress Index (SPI)</span
-          >, explore the city's social and environmental wellbeing and compare
-          SPI data for small geographic areas known as neighborhood tracts.
+          Using data for the Philadelphia Social Progress Index (SPI), explore
+          the city's social and environmental wellbeing and compare SPI data for
+          small geographic areas known as neighborhood tracts.
         </p>
 
         <p class="tw-mt-6 tw-text-xl">
@@ -52,7 +50,7 @@
       </div>
 
       <!-- Right column -->
-      <div class="tw-mt-8 tw-w-full tw-px-4 sm:tw-px-8 lg:tw-mt-0 lg:tw-w-4/12">
+      <div class="tw-mt-8 tw-w-full tw-px-2 sm:tw-px-4 lg:tw-mt-0 lg:tw-w-4/12">
         <div
           class="tw-flex tw-flex-col tw-gap-8 tw-text-base md:tw-flex-row lg:tw-flex-col"
         >
@@ -63,7 +61,7 @@
             <div class="tw-mt-1">
               Explore the Philadelphia SPI across the city using the interactive
               map. Additional indicators complement SPI data by describing key
-              demographic and socio-economic characteristics.
+              demographic and socioeconomic characteristics.
             </div>
           </div>
           <div>
@@ -93,7 +91,9 @@
     <div
       class="tw-mt-8 tw-flex tw-flex-col tw-items-center tw-justify-center tw-px-4 tw-text-lg sm:tw-px-8"
     >
-      <div class="tw-text-center">Have questions about this app? Suggestions?</div>
+      <div class="tw-text-center">
+        Have questions about this app? Suggestions?
+      </div>
       <div class="tw-mt-0.5 tw-leading-none">
         <a
           class="tw-font-semibold tw-text-[#0F7582]/80 visited:tw-text-[#0F7582]/80 hover:tw-cursor-pointer hover:tw-text-[#0F7582]"

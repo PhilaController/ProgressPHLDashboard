@@ -21,13 +21,28 @@
 
     <!-- Map div -->
     <div id="explorer-map"></div>
+
+    <!-- Mapped variable seach bar -->
+    <div
+      class="tw-absolute tw-left-0 tw-bottom-0 tw-z-[8] tw-w-full tw-rounded tw-bg-transparent tw-px-4 tw-py-2"
+    >
+      <social-progress-dropdown
+        class="tw-text-base"
+        :hierarchy="hierarchy"
+        :aliases="aliases"
+        :value="displayedVariable"
+        label="Map variable"
+        @input="$emit('update:map-variable', $event)"
+      />
+    </div>
   </div>
 </template>
 
 <script>
 // local
 import GeographySearchBar from "./components/GeographySearchBar";
-import LoadingOverlay from "@/components/LoadingOverlay";
+import LoadingOverlay from "@/components/Loading/LoadingOverlay";
+import SocialProgressDropdown from "./components/SocialProgressDropdown";
 
 // geospatial
 import maplibregl from "maplibre-gl";
@@ -46,14 +61,14 @@ export default {
     "geojson",
     "hierarchy",
     "aliases",
-    "displayedVariableName",
+    "displayedVariable",
     "selectedGeographyName",
     "selectedGeographyType",
     "neighborhoodNames",
     "regionNames",
     "focusedIds",
   ],
-  components: { LoadingOverlay, GeographySearchBar },
+  components: { LoadingOverlay, GeographySearchBar, SocialProgressDropdown },
   data() {
     return {
       /**
@@ -80,14 +95,6 @@ export default {
        * The bounds for all of Philadelphia
        */
       homeBounds: null,
-
-      /**
-       * The map's diverging color scale
-       */
-      colorScale: scaleDiverging()
-        .domain([20, 50, 80])
-        .range([0, 0.5, 1.0])
-        .interpolator(interpolateRdYlGn),
 
       /**
        * Options for the maplibre map
@@ -121,6 +128,28 @@ export default {
     this.initializeMap();
   },
   computed: {
+    /**
+     * The map's diverging color scale
+     */
+    colorScale() {
+      let domain =
+        this.displayedVariable == "social_progress_index" ||
+        this.dimensionNames.includes(this.displayedVariable)
+          ? [20, 50, 80]
+          : [0, 50, 100];
+      return scaleDiverging()
+        .domain(domain)
+        .range([0, 0.5, 1.0])
+        .interpolator(interpolateRdYlGn);
+    },
+
+    /**
+     * Alias for displayed name
+     */
+    displayedVariableName() {
+      return this.aliases[this.displayedVariable];
+    },
+
     /**
      * List of variable names, including dimensions and components
      */
@@ -166,6 +195,10 @@ export default {
      */
     selectedGeographyName() {
       this.drawSelectedGeographyLayer();
+    },
+
+    displayedVariable() {
+      this.updateColorValues();
     },
 
     /**
@@ -218,13 +251,13 @@ export default {
 
         // When map is loaded, initialize it
         map.on("load", async () => {
-          map.addControl(
-            new maplibregl.AttributionControl({
-              compact: true,
-              customAttribution: "Esri, FAO, NOAA, USGS; Powered by Esri",
-            }),
-            "bottom-right"
-          );
+          // map.addControl(
+          //   new maplibregl.AttributionControl({
+          //     compact: true,
+          //     customAttribution: "Esri, FAO, NOAA, USGS; Powered by Esri",
+          //   }),
+          //   "bottom-right"
+          // );
 
           // Add layers
           this.addLayers(map);
@@ -244,6 +277,7 @@ export default {
 
           // Loaded
           this.loaded = true;
+          this.$emit("loaded")
         });
 
         // Handle hover tracking
@@ -264,6 +298,9 @@ export default {
     resetHoverState() {
       // Reset existing hovered tract
       if (this.hoveredId !== null) {
+        // Emit
+        this.$emit("geography:unhover");
+
         this.map.setFeatureState(
           { source: "census-tracts-source", id: this.hoveredId },
           { hover: false }
@@ -290,22 +327,21 @@ export default {
           );
         }
 
-        // If not focused, do nothing else
-        if (
-          tract.properties.missing > 0
-          // || tract.state.focus == false
-        ) {
+        // If tract is missing, do nothing
+        if (tract.properties.missing > 0) {
+          this.$emit("geography:unhover");
           return;
         }
 
-        // Update hover state if not clicked
-        if (tract.state.click !== true) {
-          this.hoveredId = tract.id;
-          this.map.setFeatureState(
-            { source: "census-tracts-source", id: tract.id },
-            { hover: true }
-          );
-        }
+        // Emit the hover event
+        this.$emit("geography:hover", tract.id);
+
+        // Update hover state
+        this.hoveredId = tract.id;
+        this.map.setFeatureState(
+          { source: "census-tracts-source", id: tract.id },
+          { hover: true }
+        );
       }
     },
 
@@ -405,36 +441,6 @@ export default {
         },
         "Road/label/Local"
       );
-
-      /**
-       * Step 3: Add neighborhoods
-       */
-
-      // 3A. The source
-      // map.addSource("neighborhoods-source", {
-      //   type: "geojson",
-      //   data: this.geojson.hoods,
-      //   promoteId: "neighborhood_name",
-      // });
-
-      // // 3B. Hood outlines layer
-      // map.addLayer({
-      //   id: "hood-outlines",
-      //   source: "neighborhoods-source",
-      //   type: "line",
-      //   layout: { visibility: "none" },
-      //   paint: {
-      //     "line-width": [
-      //       "case",
-      //       ["boolean", ["feature-state", "click"], false],
-      //       4,
-      //       ["boolean", ["feature-state", "hover"], false],
-      //       2,
-      //       1.5,
-      //     ],
-      //     "line-color": "#000",
-      //   },
-      // });
     },
     highlightGeographyLayer({ name, type }) {
       return this.drawLayer({
@@ -507,7 +513,7 @@ export default {
         });
 
         // Determine padding
-        let padding = { top: 75, left: 25, right: 25, bottom: 50 };
+        let padding = { top: 75, left: 25, right: 25, bottom: 75 };
 
         // Zoom
         this.map.fitBounds(thisBbox, {
@@ -543,11 +549,8 @@ export default {
         if (e.features.length > 0) {
           let tract = e.features[0];
 
-          // If in a missing neighborhood or not focused, do nothing
-          if (
-            tract.properties.missing > 0
-            //|| tract.state.focus == false
-          ) {
+          // If missing, do nothing
+          if (tract.properties.missing > 0) {
             popup.remove();
             return;
           }

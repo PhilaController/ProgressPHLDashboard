@@ -48,6 +48,9 @@ export default {
       hoverOpacity: 1.0,
       defaultOpacity: 0.25,
       hiddenOpacity: 0.0,
+
+      // Selected
+      rightClickIds: [],
     };
   },
 
@@ -107,6 +110,18 @@ export default {
     },
   },
   methods: {
+    addRightClickSelection(geoid) {
+      if (!this.rightClickIds.includes(geoid)) this.rightClickIds.push(geoid);
+    },
+    removeRightClickSelection(geoid) {
+      this.rightClickIds = this.rightClickIds.filter((d) => d !== geoid);
+    },
+
+    resetRightClickSelection() {
+      this.rightClickIds = [];
+      this.styleCircles();
+    },
+
     styleCircles() {
       // Save the vue instance
       let t = this;
@@ -132,6 +147,8 @@ export default {
           // Reset back to default
           if (t.focusedIds.includes(d.geoid)) {
             circle.call(t.setFocusedStyle);
+          } else if (t.rightClickIds.includes(d.geoid)) {
+            circle.call(t.setRightClickStyle);
           } else {
             circle.call(t.setDefaultStyle);
           }
@@ -291,6 +308,16 @@ export default {
 
         .style("stroke-width", 0)
         .style("pointer-events", "auto");
+    },
+
+    /**
+     * Set alt-click style
+     */
+    setRightClickStyle(circles) {
+      return circles
+        .style("stroke-width", 2.0)
+        .style("stroke", "#262626")
+        .style("stroke-opacity", 1.0);
     },
 
     /**
@@ -460,7 +487,19 @@ export default {
           event.stopPropagation();
 
           // Emit the clicked tract name
-          t.$emit("click", { name: d.name, type: "tract" });
+          let name = event.metaKey ? "right-click" : "click";
+          t.$emit(name, { name: d.name, type: "tract" });
+
+          // Style shift click
+          if (name == "right-click") {
+            // Track the geoid
+            if (!t.rightClickIds.includes(d.geoid)) {
+              if (t.rightClickIds.length < 2) t.addRightClickSelection(d.geoid);
+            } else t.removeRightClickSelection(d.geoid);
+
+            // Style
+            select(this).raise().call(t.setRightClickStyle);
+          }
         })
         .on("mouseover", function (event, d) {
           // Hide selected
@@ -489,6 +528,8 @@ export default {
           let circle = select(this);
           if (t.focusedIds.includes(d.geoid)) {
             circle.call(t.setFocusedStyle);
+          } else if (t.rightClickIds.includes(d.geoid)) {
+            circle.call(t.setRightClickStyle);
           } else circle.call(t.setDefaultStyle);
         });
 
