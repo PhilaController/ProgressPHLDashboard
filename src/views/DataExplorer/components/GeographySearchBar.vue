@@ -24,7 +24,7 @@
       >
       <span
         v-else
-        class="tw-block tw-truncate tw-break-all tw-pr-2 tw-text-[1em] tw-font-bold tw-text-gray-700"
+        class="tw-block tw-truncate tw-break-all tw-pr-2 tw-text-[1em] tw-font-semibold tw-text-gray-700"
         >{{ selectedOptionLabel }}
       </span>
 
@@ -124,6 +124,7 @@
 <script>
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point } from "@turf/helpers";
+import { mapState } from "vuex";
 
 /**
  * Get request to the specified, or raise an error
@@ -141,21 +142,6 @@ async function safeFetch(url) {
 export default {
   name: "GeographySearchBar",
   props: {
-    /**
-     * Census tracts geojson
-     */
-    tractFeatures: { type: Array, required: true },
-
-    /**
-     * Neighborhood names
-     */
-    neighborhoodNames: { type: Array, required: true },
-
-    /**
-     * Region names
-     */
-    regionNames: { type: Array, required: true },
-
     /**
      * Selected value
      */
@@ -267,6 +253,12 @@ export default {
   },
 
   computed: {
+    ...mapState(["regionNames", "neighborhoodNames", "geojson"]),
+
+    tractFeatures() {
+      return this.geojson.tracts.features;
+    },
+
     /**
      * All options, composed of region and neighborhood names
      */

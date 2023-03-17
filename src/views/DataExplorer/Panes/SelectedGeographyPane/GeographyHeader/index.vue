@@ -143,25 +143,11 @@ import NeighborhoodSubheader from "./Subheaders/Neighborhood";
 import TractSubheader from "./Subheaders/Tract";
 import RegionSubheader from "./Subheaders/Region";
 
-import { rollup, max } from "d3-array";
-
-// Load crosswalks
-const regionsToHoods = require("@/data/regionsToHoods")
-const hoodsToRegions = require("@/data/hoodsToRegions")
+import { mapState } from "vuex";
 
 export default {
   name: "GeographyHeader",
   props: {
-    /**
-     * The height of the ProgressPHL navbar in pixels
-     */
-    navBarHeight: { type: Number },
-
-    /**
-     * The height of the controller.phila.gov navbar in pixels
-     */
-    controllerNavHeight: { type: Number },
-
     /**
      * Name of selected geography name
      */
@@ -171,11 +157,6 @@ export default {
      * Type of selected geography name
      */
     selectedGeographyType: { type: String },
-
-    /**
-     * Census tract features
-     */
-    tractFeatures: { type: Array, required: true },
 
     /**
      * Names of tracts selected for scorecard page
@@ -190,8 +171,6 @@ export default {
   },
   data() {
     return {
-      regionsToHoods: regionsToHoods,
-      hoodsToRegions: hoodsToRegions,
       observer: null,
       height: null,
     };
@@ -220,23 +199,28 @@ export default {
   },
 
   computed: {
+    ...mapState([
+      "navBarHeight",
+      "controllerNavHeight",
+      "neighborhoodSizes",
+      "geojson",
+      "regionsToHoods",
+      "hoodsToRegions",
+    ]),
+
+    /**
+     * Census tract features
+     */
+    tractFeatures() {
+      return this.geojson.tracts.features;
+    },
+
     /**
      * Top padding to offset navbars
      */
     topOffset() {
       const padding = this.navBarHeight + this.controllerNavHeight;
       return `top: ${padding}px`;
-    },
-
-    /**
-     * Number of tracts per neighborhood
-     */
-    neighborhoodSizes() {
-      return rollup(
-        this.tractFeatures,
-        (grp) => max(grp, (d) => +d.properties.tract_id),
-        (d) => d.properties.neighborhood_name
-      );
     },
   },
   methods: {

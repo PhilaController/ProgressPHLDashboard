@@ -5,19 +5,25 @@
   <div
     v-else
     class="tw-relative tw-flex tw-flex-col"
+    :class="wrapperClass"
     :style="getPaddingTop(controllerNavHeight)"
   >
     <!-- Navbar -->
     <navbar :height="navBarHeight" />
 
     <!-- Main content -->
-    <div :style="getPaddingTop(navBarHeight)">
+    <div
+      class="tw-relative tw-flex tw-h-full tw-w-full"
+      :class="contentClass"
+      :style="getPaddingTop(navBarHeight)"
+    >
       <slot></slot>
     </div>
   </div>
 </template>
 
 <script>
+import { mapState } from "vuex";
 import LoadingPage from "./Loading/LoadingPage";
 import Navbar from "./Navbar";
 
@@ -25,26 +31,24 @@ export default {
   name: "ContentWrapper",
   props: {
     /**
-     * The height of the ProgressPHL navbar in pixels
-     */
-    navBarHeight: { type: Number },
-
-    /**
-     * The height of the controller.phila.gov navbar in pixels
-     */
-    controllerNavHeight: { type: Number },
-
-    /**
-     * Do we need top padding
-     */
-    usePadding: { type: Boolean },
-
-    /**
      * Is the page loading?
      */
     isLoading: { type: Boolean },
+
+    /**
+     * Extra classes for content wrapper
+     */
+    contentClass: { type: String, default: "" },
+
+    /**
+     * Extra classes for div wrapper
+     */
+    wrapperClass: { type: String, default: "" },
   },
   components: { Navbar, LoadingPage },
+  computed: {
+    ...mapState(["navBarHeight", "controllerNavHeight", "usePadding"]),
+  },
   methods: {
     getPaddingTop(padding) {
       if (this.usePadding) return `padding-top: ${padding}px`;

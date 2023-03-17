@@ -7,7 +7,9 @@
         <div class="tw-text-2xl">
           <i class="fas fa-table"></i>
         </div>
-        <div class="tw-ml-2 tw-text-2xl tw-font-bold">Scorecard Preview</div>
+        <div class="tw-ml-2 tw-text-2xl tw-font-semibold">
+          Scorecard Preview
+        </div>
       </div>
 
       <!-- Intro text -->

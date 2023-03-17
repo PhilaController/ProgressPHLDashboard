@@ -25,7 +25,7 @@
         </div>
         <!-- selectButtonLabel -->
         <div
-          class="tw-block tw-truncate tw-break-all tw-pr-2 tw-text-[1em] tw-font-bold tw-text-gray-700"
+          class="tw-block tw-truncate tw-break-all tw-pr-2 tw-text-[1em] tw-font-semibold tw-text-gray-700"
           :class="selectButtonLabelClasses"
         >
           {{ selectedOptionLabel }}
@@ -103,18 +103,10 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
+
 export default {
   props: {
-    /**
-     * Metadata hierarchy for SPI
-     */
-    hierarchy: { type: Object },
-
-    /**
-     * Metadata aliases for SPI
-     */
-    aliases: { type: Object },
-
     /**
      * Selected value
      */
@@ -172,6 +164,8 @@ export default {
     };
   },
   computed: {
+    ...mapState(["metadata"]),
+
     buttonClasses() {
       let out = [];
       if (this.direction === "up") {
@@ -199,13 +193,13 @@ export default {
      */
     SPIVariables() {
       let out = ["social_progress_index"];
-      const dimensions = this.hierarchy["social_progress_index"];
+      const dimensions = this.metadata.hierarchy["social_progress_index"];
 
       // Loop over dimensions and components and indicators
       for (let i = 0; i < dimensions.length; i++) {
         const dim = dimensions[i];
         out.push(dim);
-        const components = this.hierarchy[dim];
+        const components = this.metadata.hierarchy[dim];
         for (let j = 0; j < components.length; j++) {
           const component = components[j];
           out.push(component);
@@ -220,7 +214,7 @@ export default {
      */
     options() {
       return this.SPIVariables.map((d) => {
-        return { label: this.aliases[d], value: d };
+        return { label: this.metadata.aliases[d], value: d };
       });
     },
   },

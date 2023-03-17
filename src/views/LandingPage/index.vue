@@ -33,39 +33,17 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 import Logo from "./components/Logo";
 import Buttons from "./components/Buttons";
 
 export default {
   name: "LandingPage",
-  props: {
-    /**
-     * The height of the controller.phila.gov navbar in pixels
-     */
-    controllerNavHeight: { type: Number },
 
-    /**
-     * The geojson collections
-     */
-    geojson: { type: Object },
-
-    /**
-     * SPI data
-     */
-    data: { type: Object },
-
-    /**
-     * Metadata for SPI
-     */
-    metadata: { type: Object },
-
-    /**
-     * Whether to use the top padding (on small screens it isn't needed)
-     */
-    usePadding: { type: Boolean },
-  },
   components: { Logo, Buttons },
   computed: {
+    ...mapState(["controllerNavHeight", "usePadding", "data", "geojson"]),
+
     /**
      * Apply top padding to offset nav bar
      */

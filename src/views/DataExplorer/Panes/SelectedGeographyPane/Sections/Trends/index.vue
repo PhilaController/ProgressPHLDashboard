@@ -22,7 +22,7 @@
           <circle cx="169.34" cy="113.5" r="13.17" />
         </svg>
       </div>
-      <div class="tw-ml-2 tw-text-2xl tw-font-bold">Citywide Trends</div>
+      <div class="tw-ml-2 tw-text-2xl tw-font-semibold">Citywide Trends</div>
     </div>
 
     <!-- Intro text -->
@@ -242,17 +242,14 @@ import Dropdown from "@/components/Dropdowns/Dropdown";
 import ScatterChart from "./ScatterChart";
 import InputButton from "./InputButton";
 import CommandIcon from "./CommandIcon";
-import { json } from "d3-fetch";
+
 import { format } from "d3-format";
 
-// The SPI url
-const SPI_URL = "https://spi-dashboard-data.s3.amazonaws.com/v1/trends";
+import { mapState } from "vuex";
 
 export default {
   name: "TrendsSection",
   props: [
-    "data",
-    "metadata",
     "selectedGeographyName",
     "selectedGeographyType",
     "focusedIds",
@@ -304,7 +301,6 @@ export default {
       /**
        * Data cache
        */
-      dataCache: {},
       comparisonData: null,
       demographicData: null,
 
@@ -325,36 +321,51 @@ export default {
     /**
      * When selected comparison variable changes, pull new data
      */
-    selectedComparisonVariable(value) {
+    selectedComparisonVariable(variable) {
       // Chart isn't ready
       this.chartReady = false;
 
-      // Fetch
-      this.fetchData(value).then((data) => {
-        this.dataCache[value] = this.comparisonData = data;
+      // Check the store
+      let d = this.$store.state.trendsDataCache[variable];
+
+      // Fetch if we need to
+      if (!d) {
+        this.$store.dispatch("fetchTrendsData", { variable }).then((data) => {
+          this.comparisonData = data;
+          this.chartReady = true;
+        });
+      } else {
+        this.comparisonData = d;
         this.chartReady = true;
-      });
+      }
     },
 
     /**
      * Get the selected demographic data when value changes
      */
-    selectedDemographicVariable(value) {
-      if (value) {
-        // Chart isn't ready
-        this.chartReady = false;
+    selectedDemographicVariable(variable) {
+      if (variable) {
+        // Check the store
+        let d = this.$store.state.trendsDataCache[variable];
 
-        // Fetch
-        this.fetchData(value).then((data) => {
-          this.dataCache[value] = this.demographicData = data;
+        // Fetch if we need to
+        if (!d) {
+          this.$store.dispatch("fetchTrendsData", { variable }).then((data) => {
+            this.demographicData = data;
+            this.chartReady = true;
+          });
+        } else {
+          this.demographicData = d;
           this.chartReady = true;
-        });
+        }
       } else {
         this.demographicData = null;
       }
     },
   },
   computed: {
+    ...mapState(["data", "metadata"]),
+
     tickFormatter() {
       // Format $
       if (this.selectedComparisonVariable === "median_household_income")
@@ -474,25 +485,27 @@ export default {
       this.$refs.demographicFilterInput.handleClear();
       this.selectedDemographicVariable = null;
     },
-    getDropdownIndent(d) {
-      if (d == "social_progress_index") return "";
-      else if (this.metadata.hierarchy["social_progress_index"].includes(d))
-        return " &nbsp; ";
-      else return " &nbsp;&nbsp;&nbsp; ";
-    },
+
     getIncomeFormatter(decimals) {
       return (d) => "$" + format(`,.${decimals}f`)(d / 1e3) + "k";
     },
+
     getPercentFormatter(decimals) {
       return (d) => format(`,.${decimals}f`)(d * 100) + "%";
     },
 
     /**
-     * Fetch data from s3
+     * Set comparison data
      */
-    fetchData(tag) {
-      const url = `${SPI_URL}/${tag}.json`;
-      return json(url);
+    setComparisonData(variable) {
+      let d = this.$store.state.trendsDataCache[variable];
+      if (!d) {
+        this.$store
+          .dispatch("fetchTrendsData", { variable })
+          .then((data) => (this.comparisonData = data));
+      } else {
+        this.comparisonData = d;
+      }
     },
   },
 };

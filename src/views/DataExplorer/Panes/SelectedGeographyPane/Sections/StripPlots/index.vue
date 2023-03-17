@@ -26,7 +26,9 @@
           class="tw-mx-[1px] tw-h-full tw-flex-grow tw-border tw-border-cyan-500 tw-bg-cyan-300"
         ></div>
       </div>
-      <div class="tw-ml-2 tw-text-2xl tw-font-bold">Social Progress Scores</div>
+      <div class="tw-ml-2 tw-text-2xl tw-font-semibold">
+        Social Progress Scores
+      </div>
     </div>
 
     <!-- Intro text -->
@@ -108,6 +110,7 @@
           @click="$emit('geography:select', $event)"
           @mouseover="$emit('geography:hover', $event)"
           @mouseleave="$emit('geography:unhover')"
+          @ready="loadedCharts += 1"
         />
       </div>
 
@@ -148,6 +151,7 @@
             @click="$emit('geography:select', $event)"
             @mouseover="$emit('geography:hover', $event)"
             @mouseleave="$emit('geography:unhover')"
+            @ready="loadedCharts += 1"
           />
         </div>
 
@@ -194,6 +198,7 @@
               @click="$emit('geography:select', $event)"
               @mouseover="$emit('geography:hover', $event)"
               @mouseleave="$emit('geography:unhover')"
+              @ready="loadedCharts += 1"
             />
           </div>
         </template>
@@ -206,6 +211,7 @@
 import StripPlot from "./StripPlot";
 import OptionsMenu from "./OptionsMenu";
 import ScorecardPopup from "./ScorecardPopup";
+import { mapState } from "vuex";
 
 export default {
   name: "StripPlotsSection",
@@ -221,16 +227,6 @@ export default {
     selectedGeographyType: { type: String },
 
     /**
-     * SPI data
-     */
-    data: { type: Object, required: true },
-
-    /**
-     * Metadata for SPI
-     */
-    metadata: { type: Object, required: true },
-
-    /**
      * GEOIDs of focused tracts
      */
     focusedIds: { type: Array },
@@ -239,11 +235,6 @@ export default {
      * GEOID of hovered tract
      */
     hoveredId: { type: String },
-
-    /**
-     * Number of tracts in selected geography
-     */
-    selectedGeographySize: { type: Number, required: true },
   },
   components: {
     StripPlot,
@@ -252,6 +243,7 @@ export default {
   },
   data() {
     return {
+      loadedCharts: 0,
       modalShowing: false,
       scorecardValue: null,
       /**
@@ -310,6 +302,22 @@ export default {
           "includes indicators tracking educational attainment beyond the high school level.",
       },
     };
+  },
+
+  watch: {
+    loadedCharts(value) {
+      this.$emit("loaded-charts", value);
+    },
+  },
+  computed: {
+    ...mapState(["data", "metadata"]),
+
+    /**
+     * Number of tracts in the selected geography
+     */
+    selectedGeographySize() {
+      return this.focusedIds.length;
+    },
   },
   methods: {
     /**

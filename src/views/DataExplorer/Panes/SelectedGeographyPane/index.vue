@@ -4,9 +4,6 @@
     <geography-header
       :selected-geography-name="selectedGeographyName"
       :selected-geography-type="selectedGeographyType"
-      :nav-bar-height="navBarHeight"
-      :controller-nav-height="controllerNavHeight"
-      :tract-features="tractFeatures"
       :scorecard-tracts="scorecardTracts"
       @mounted="headerHeight = $event"
       @change:height="headerHeight = $event"
@@ -25,7 +22,6 @@
       <indicators-section
         id="indicators-section"
         class="tw-mt-0 tw-px-4 sm:tw-px-8"
-        :data="selectedCensusData"
         :selected-geography-name="selectedGeographyName"
         :selected-geography-type="selectedGeographyType"
       />
@@ -36,9 +32,6 @@
         class="tw-mt-14 tw-px-4 sm:tw-px-8"
         :selected-geography-name="selectedGeographyName"
         :selected-geography-type="selectedGeographyType"
-        :selected-geography-size="selectedGeographySize"
-        :data="data"
-        :metadata="metadata"
         :focused-ids="focusedIds"
         :hovered-id="hoveredId"
         @geography:select="$emit('geography:select', $event)"
@@ -46,6 +39,7 @@
         @geography:unhover="$emit('geography:unhover')"
         @update:map-variable="$emit('update:map-variable', $event)"
         @scroll="handleScroll"
+        @loaded-charts="$emit('loaded-charts', $event)"
       />
 
       <!-- Trends -->
@@ -54,8 +48,6 @@
         class="tw-mt-20 tw-px-0 sm:tw-px-8"
         :selected-geography-name="selectedGeographyName"
         :selected-geography-type="selectedGeographyType"
-        :data="data"
-        :metadata="metadata"
         :focused-ids="focusedIds"
         :scorecard-tracts="scorecardTracts"
         @geography:select="$emit('geography:select', $event)"
@@ -76,27 +68,11 @@ import IndicatorsSection from "./Sections/Indicators";
 import StripPlotsSection from "./Sections/StripPlots";
 import TrendsSection from "./Sections/Trends";
 
-// d3
-import { json } from "d3-fetch";
-
-// The SPI url
-const SPI_URL = "https://spi-dashboard-data.s3.amazonaws.com/v1/census-data";
+import { mapState } from "vuex";
 
 export default {
   name: "SelectedGeographyPage",
   props: {
-    /**
-     * The height of the ProgressPHL navbar in pixels
-     */
-    navBarHeight: { type: Number },
-
-    /**
-     * The height of the controller.phila.gov navbar in pixels
-     */
-    controllerNavHeight: { type: Number },
-
-    usePadding: { type: Boolean },
-
     /**
      * Name of selected geography name
      */
@@ -106,21 +82,6 @@ export default {
      * Type of selected geography name
      */
     selectedGeographyType: { type: String },
-
-    /**
-     * Census tract features
-     */
-    tractFeatures: { type: Array, required: true },
-
-    /**
-     * SPI data
-     */
-    data: { type: Object, required: true },
-
-    /**
-     * Metadata for SPI
-     */
-    metadata: { type: Object, required: true },
 
     /**
      * GEOIDs of focused tracts
@@ -151,63 +112,15 @@ export default {
       observer: null,
       headerHeight: null,
 
-      /**
-       * Census data cache
-       */
-      censusData: {},
-      selectedCensusData: null,
+      /** Show overlay */
     };
   },
 
-  created() {
-    // Pull census data
-    this.setCensusData(this.selectedGeographyName);
-  },
-
   computed: {
-    /**
-     * Number of tracts in the selected geography
-     */
-    selectedGeographySize() {
-      return this.focusedIds.length;
-    },
-  },
-
-  watch: {
-    /**
-     * Pull the new census data if we need to
-     */
-    selectedGeographyName(newValue) {
-      this.setCensusData(newValue);
-    },
+    ...mapState(["navBarHeight"]),
   },
 
   methods: {
-    /**
-     * Get the census data indicators
-     */
-    setCensusData(value) {
-      if (value !== null) {
-        // Get the data from the cache
-        let data = this.censusData[value];
-
-        // Pull the data if we need to
-        if (!data) {
-          const url = `${SPI_URL}/${value}.json`;
-          json(url).then((data) => {
-            this.censusData[value] = this.selectedCensusData = data;
-          });
-        }
-        // Or use the cached data
-        else {
-          this.selectedCensusData = data;
-        }
-      } else {
-        // Reset the selected census data
-        this.selectedCensusData = null;
-      }
-    },
-
     /**
      * Scroll to the specified element, or to the top if none is provided
      */

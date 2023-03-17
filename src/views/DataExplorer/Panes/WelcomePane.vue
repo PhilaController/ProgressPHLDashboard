@@ -1,11 +1,12 @@
 <template>
   <div class="tw-mt-8">
+    <!-- Top section -->
     <div
       class="tw-flex tw-flex-col tw-border-b-4 tw-border-stone-400/50 tw-pb-10 lg:tw-flex-row"
     >
-      <!-- Left column -->
+      <!-- Left/top -->
       <div class="tw-mr-2 tw-w-full tw-px-4 sm:tw-px-8 lg:tw-w-8/12">
-        <div class="tw-text-3xl tw-font-bold">
+        <div class="tw-text-3xl tw-font-semibold">
           Welcome to the ProgressPHL Data Explorer!
         </div>
 
@@ -23,9 +24,6 @@
         <geography-search-bar
           class="tw-mt-6 tw-text-xl"
           placeholder="Search for a Region, Neighborhood, or Address..."
-          :tract-features="tractFeatures"
-          :neighborhood-names="neighborhoodNames"
-          :region-names="regionNames"
           :value="selectedGeographyName"
           @input="$emit('geography:select', $event)"
         />
@@ -49,14 +47,15 @@
         </div>
       </div>
 
-      <!-- Right column -->
-      <div class="tw-mt-8 tw-w-full tw-px-2 sm:tw-px-4 lg:tw-mt-0 lg:tw-w-4/12">
+      <!-- Right/bottom -->
+      <div class="tw-mt-8 tw-w-full tw-px-4 sm:tw-px-8 lg:tw-mt-0 lg:tw-w-4/12">
         <div
           class="tw-flex tw-flex-col tw-gap-8 tw-text-base md:tw-flex-row lg:tw-flex-col"
         >
+          <!-- Explore -->
           <div>
-            <div class="tw-text-2xl tw-font-bold">
-              <i class="fas fa-search"></i> Explore
+            <div class="tw-text-2xl tw-font-semibold">
+              <i class="fas fa-search tw-text-xl"></i> Explore
             </div>
             <div class="tw-mt-1">
               Explore the Philadelphia SPI across the city using the interactive
@@ -64,9 +63,10 @@
               demographic and socioeconomic characteristics.
             </div>
           </div>
+          <!-- Compare -->
           <div>
-            <div class="tw-text-2xl tw-font-bold">
-              <i class="fas fa-balance-scale-left"></i> Compare
+            <div class="tw-text-2xl tw-font-semibold">
+              <i class="fas fa-balance-scale-left tw-text-xl"></i> Compare
             </div>
             <div class="tw-mt-1">
               Compare how scores for the SPI as well as its underlying
@@ -74,9 +74,10 @@
               neighborhood tracts in the city.
             </div>
           </div>
+          <!-- Download -->
           <div>
-            <div class="tw-text-2xl tw-font-bold">
-              <i class="fas fa-download"></i> Download
+            <div class="tw-text-2xl tw-font-semibold">
+              <i class="fas fa-download tw-text-xl"></i> Download
             </div>
             <div class="tw-mt-1">
               Each neighborhood tract's overall SPI score, as well as the data
@@ -88,6 +89,7 @@
       </div>
     </div>
 
+    <!-- Bottom section -->
     <div
       class="tw-mt-8 tw-flex tw-flex-col tw-items-center tw-justify-center tw-px-4 tw-text-lg sm:tw-px-8"
     >
@@ -107,30 +109,19 @@
 
 <script>
 import GeographySearchBar from "../components/GeographySearchBar";
+import { mapState } from "vuex";
 
 export default {
-  name: "WelcomePage",
+  name: "WelcomePane",
   props: {
-    /**
-     * Census tract features
-     */
-    tractFeatures: { type: Array, required: true },
-
-    /**
-     * Unique neighborhood names
-     */
-    neighborhoodNames: { type: Array, required: true },
-
-    /**
-     * Unique region names
-     */
-    regionNames: { type: Array, required: true },
-
     /**
      * The name of the selected geography
      */
     selectedGeographyName: { type: String },
   },
   components: { GeographySearchBar },
+  computed: {
+    ...mapState(["neighborhoodNames", "regionNames"]),
+  },
 };
 </script>

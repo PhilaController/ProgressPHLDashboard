@@ -2,7 +2,7 @@
   <div class="tw-mx-2 tw-mt-10 tw-h-fit">
     <!-- Dimensions label -->
     <div
-      class="tw-mb-2 tw-text-sm tw-font-bold tw-uppercase tw-tracking-wider tw-text-neutral-500"
+      class="tw-mb-2 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wider tw-text-neutral-500"
     >
       Dimensions
     </div>
@@ -11,7 +11,7 @@
     <div class="tw-flex tw-w-full tw-flex-col sm:tw-flex-row">
       <div
         v-for="(name, i) in hierarchy['social_progress_index']"
-        class="tw-flex tw-w-full tw-flex-col tw-justify-center tw-rounded-t-md tw-border-2 tw-p-2 tw-text-center tw-font-bold tw-uppercase tw-tracking-wider hover:tw-cursor-pointer sm:tw-w-1/3"
+        class="tw-flex tw-w-full tw-flex-col tw-justify-center tw-rounded-t-md tw-border-2 tw-p-2 tw-text-center tw-font-semibold tw-uppercase tw-tracking-wider hover:tw-cursor-pointer sm:tw-w-1/3"
         tabindex="0"
         :class="getDimensionClasses(i, name)"
         @click.prevent="setDimension(name)"
@@ -49,7 +49,7 @@
         >
           <!-- Column header -->
           <div
-            class="tw-mx-auto tw-mt-2 tw-mb-4 tw-w-fit tw-border-b-2 tw-border-b-neutral-500 tw-text-sm tw-font-bold tw-uppercase tw-tracking-wider tw-text-neutral-500 sm:tw-mt-0"
+            class="tw-mx-auto tw-mt-2 tw-mb-4 tw-w-fit tw-border-b-2 tw-border-b-neutral-500 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wider tw-text-neutral-500 sm:tw-mt-0"
           >
             {{ header }}
           </div>
@@ -99,7 +99,7 @@
             :class="getStyleClasses(dimension, true, false)"
             id="definition"
           >
-            <div class="tw-mt-2 tw-font-bold">
+            <div class="tw-mt-2 tw-font-semibold">
               {{ aliases[indicator] }}
             </div>
             <div
@@ -109,7 +109,7 @@
             <div class="tw-mt-8">
               Source:
               <a
-                class="tw-font-bold tw-text-zinc-800 visited:tw-text-zinc-800 hover:tw-text-zinc-800 hover:tw-underline"
+                class="tw-font-semibold tw-text-zinc-800 visited:tw-text-zinc-800 hover:tw-text-zinc-800 hover:tw-underline"
                 :href="definitions[indicator].source.url"
                 >{{ definitions[indicator].source.text }}</a
               >
@@ -179,7 +179,6 @@ function getSVGPoint(svg, elem, orientation, dx = 4) {
 export default {
   name: "DefinitionsTable",
   props: {
-
     /**
      * Is the data for this page loaded
      */
@@ -586,7 +585,7 @@ export default {
       let c;
       if (name == this.component) {
         c = this.getStyleClasses(this.dimension, true);
-        c += " tw-font-bold";
+        c += " tw-font-semibold";
       } else {
         c = "tw-border-neutral-300 tw-bg-neutral-100 hover:tw-bg-neutral-300";
         c += " tw-opacity-75";
@@ -604,7 +603,7 @@ export default {
       let c;
       if (name == this.indicator) {
         c = this.getStyleClasses(this.dimension, true);
-        c += " tw-font-bold";
+        c += " tw-font-semibold";
       } else {
         c = "tw-border-neutral-300 tw-bg-neutral-100 hover:tw-bg-neutral-300";
         c += "  tw-opacity-75";

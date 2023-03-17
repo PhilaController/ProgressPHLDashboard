@@ -1,10 +1,5 @@
 <template>
-  <content-wrapper
-    :controller-nav-height="controllerNavHeight"
-    :use-padding="usePadding"
-    :nav-bar-height="navBarHeight"
-    :is-loading="false"
-  >
+  <content-wrapper :is-loading="false">
     <div class="tw-mt-8 tw-text-base">
       <!-- Intro message -->
       <div
@@ -104,22 +99,6 @@ import DimensionSummary from "./DimensionSummary";
 export default {
   name: "AboutPage",
   components: { SocialProgressFramework, DimensionSummary, ContentWrapper },
-  props: {
-    /**
-     * The height of the ProgressPHL navbar in pixels
-     */
-    navBarHeight: { type: Number },
-
-    /**
-     * The height of the controller.phila.gov navbar in pixels
-     */
-    controllerNavHeight: { type: Number },
-
-    /**
-     * Do we need top padding
-     */
-    usePadding: { type: Boolean },
-  },
   data() {
     return {
       data: [

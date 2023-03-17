@@ -1,41 +1,24 @@
 <template>
-  <!-- Show a loader if data hasn't loaded-->
-  <loading-page v-if="isLoading" />
-
-  <!-- Data is loaded -->
-  <div
-    v-else
-    class="tw-relative tw-flex tw-flex-col tw-text-lg lg:tw-h-screen"
-    :style="getPaddingTop(controllerNavHeight)"
+  <content-wrapper
+    :is-loading="isLoading"
+    wrapper-class="lg:tw-h-screen tw-text-lg"
+    content-class="tw-flex-col lg:tw-flex-row"
   >
-    <div
-      v-if="!mapLoaded"
-      class="tw-fixed tw-inset-0 tw-z-[10] tw-flex tw-h-screen tw-w-screen tw-bg-white/75"
-    ></div>
-    <!-- Navbar -->
-    <navbar
-      :height="navBarHeight"
-      :selected-tracts="scorecardComparisonTracts"
-    />
+    <!-- Make sure this doesn't render until data is loaded -->
+    <template v-if="!isLoading" #default>
+      <!-- Show an overlay if map isn't loaded -->
+      <div
+        v-if="showOverlay"
+        class="tw-fixed tw-inset-0 tw-z-[10] tw-flex tw-h-screen tw-w-screen tw-bg-white/75"
+      ></div>
 
-    <!-- Main app -->
-    <div
-      class="tw-relative tw-flex tw-h-full tw-w-full tw-flex-col lg:tw-flex-row"
-      :style="getPaddingTop(navBarHeight)"
-    >
       <!-- Map -->
       <div
         class="tw-h-[400px] tw-w-full tw-border-x-4 tw-border-y-4 tw-border-stone-400/50 lg:tw-h-full lg:tw-w-1/3"
       >
         <explorer-map
           ref="ExplorerMap"
-          :data="data"
-          :geojson="geojson"
           :displayed-variable="mappedVariable"
-          :hierarchy="metadata.hierarchy"
-          :aliases="metadata.aliases"
-          :neighborhood-names="neighborhoodNames"
-          :region-names="regionNames"
           :selected-geography-name="selectedGeographyName"
           :selected-geography-type="selectedGeographyType"
           :focused-ids="focusedIds"
@@ -43,7 +26,7 @@
           @geography:hover="hoveredId = $event"
           @geography:unhover="hoveredId = null"
           @update:map-variable="($event) => (mappedVariable = $event)"
-          @loaded="mapLoaded = true"
+          @loaded="showOverlay = false"
         />
       </div>
 
@@ -54,10 +37,7 @@
       >
         <!-- Welcome Pane: No neighborhood selection  -->
         <welcome-pane
-          v-if="selectedGeographyName == null"
-          :tract-features="geojson.tracts.features"
-          :neighborhood-names="neighborhoodNames"
-          :region-names="regionNames"
+          v-if="selectedGeographyName === null"
           :selected-geography-name="selectedGeographyName"
           @geography:select="handleGeographySelection"
         />
@@ -67,11 +47,6 @@
           v-else
           :selected-geography-name="selectedGeographyName"
           :selected-geography-type="selectedGeographyType"
-          :nav-bar-height="navBarHeight"
-          :controller-nav-height="controllerNavHeight"
-          :tract-features="geojson.tracts.features"
-          :data="data"
-          :metadata="metadata"
           :focused-ids="focusedIds"
           :hovered-id="hoveredId"
           :scorecard-tracts="scorecardComparisonTracts"
@@ -85,78 +60,47 @@
           @geography:hover="handleStripPlotMouseover"
           @geography:unhover="handleStripPlotMouseleave"
           @update:map-variable="($event) => (mappedVariable = $event)"
+          @loaded-charts="handleChartLoad"
         />
       </div>
-    </div>
-  </div>
+    </template>
+  </content-wrapper>
 </template>
 
 <script>
 // Local
-import LoadingPage from "@/components/Loading/LoadingPage";
+import ContentWrapper from "@/components/ContentWrapper";
 import WelcomePane from "./Panes/WelcomePane";
 import SelectedGeographyPane from "./Panes/SelectedGeographyPane";
 import ExplorerMap from "./ExplorerMap.vue";
-import Navbar from "@/components/Navbar";
 
-// d3
-import { ascending } from "d3-array";
-
-// These neighborhoods can be ignored
-const missingHoods = ["Park", "Airport-Navy Yard", "NE Airport"];
+// external
+import { mapState } from "vuex";
 
 export default {
   name: "DataExplorer",
-  props: {
-    /**
-     * The height of the ProgressPHL navbar in pixels
-     */
-    navBarHeight: { type: Number },
-
-    /**
-     * The height of the controller.phila.gov navbar in pixels
-     */
-    controllerNavHeight: { type: Number },
-
-    /**
-     * Do we need top padding
-     */
-    usePadding: { type: Boolean },
-
-    /**
-     * The geojson collections
-     */
-    geojson: { type: Object },
-
-    /**
-     * SPI data
-     */
-    data: { type: Object },
-
-    /**
-     * Metadata for SPI
-     */
-    metadata: { type: Object },
-  },
-
   components: {
+    ContentWrapper,
     WelcomePane,
     SelectedGeographyPane,
-    Navbar,
-    LoadingPage,
     ExplorerMap,
   },
   data() {
     return {
       /**
-       * Scorecard comparisons
+       * Names of tracts for scorecard comparison
        */
       scorecardComparisonTracts: [],
 
       /**
-       * Is the map fully loaded?
+       * Should we show an overlay
        */
-      mapLoaded: false,
+      showOverlay: true,
+
+      /**
+       * Count loaded strip plots
+       */
+      loadedCharts: 0,
 
       /**
        * Is there a currently selected geography?
@@ -175,6 +119,11 @@ export default {
        * What variable is currently mapped
        */
       mappedVariable: "social_progress_index",
+
+      /**
+       * Data cache for scatter chart
+       */
+      scatterChartDataCache: {},
     };
   },
 
@@ -212,39 +161,22 @@ export default {
     },
   },
   computed: {
-    /**
-     * Neighborhood names, sorted alphabetically
-     */
-    neighborhoodNames() {
-      // Extract neighborhood names
-      let values = this.geojson.tracts.features.map(
-        (d) => d.properties.neighborhood_name
-      );
-
-      // Return unique values, sorted
-      return [...new Set(values)]
-        .filter((name) => !missingHoods.includes(name))
-        .sort((a, b) => ascending(a, b));
-    },
-
-    /**
-     * Region (PUMA) names, sorted alphabetically
-     */
-    regionNames() {
-      // Extract PUMA names
-      let values = this.geojson.tracts.features.map(
-        (d) => d.properties.puma_name
-      );
-
-      // Return unique values, sorted
-      return [...new Set(values)].sort((a, b) => ascending(a, b));
-    },
+    // Grab state from data store
+    ...mapState([
+      "data",
+      "metadata",
+      "geojson",
+      "neighborhoodNames",
+      "regionNames",
+    ]),
 
     /**
      * Whether we need to show spinner until data is loaded
      */
     isLoading() {
-      return this.data == null || this.geojson == null;
+      return (
+        this.data === null || this.geojson === null || this.metadata === null
+      );
     },
 
     /**
@@ -280,6 +212,10 @@ export default {
   },
 
   methods: {
+    handleChartLoad(value) {
+      this.loadedCharts = value;
+      if (value == 16 && this.showOverlay) this.showOverlay = false;
+    },
     /**
      * Update comparison add
      */
@@ -293,7 +229,6 @@ export default {
      * Handle comparison reset
      */
     handleComparisonReset() {
-      console.log("HELLO");
       this.scorecardComparisonTracts = [];
     },
 
@@ -308,35 +243,16 @@ export default {
     },
 
     /**
-     * Determine the padding to use
-     */
-    getPaddingTop(padding) {
-      if (this.usePadding) return `padding-top: ${padding}px`;
-      else return "";
-    },
-    /**
-     * Get the properties for the specified tract name
-     */
-    getTractDataByName(name) {
-      return this.geojson.tracts.features.find(
-        (d) =>
-          `${d.properties.neighborhood_name} ${+d.properties.tract_id}` == name
-      ).properties;
-    },
-
-    /**
      * Handle mouseover event from a strip plot
      */
     handleStripPlotMouseover({ name, type }) {
       this.highlightGeography({ name, type });
-      //this.hoveredId = this.getTractDataByName(name).geoid;
     },
 
     /**
      * Handle mouseleave event from a strip plot
      */
     handleStripPlotMouseleave() {
-      //this.hoveredId = null;
       this.unHighlightGeography();
     },
 
@@ -358,10 +274,27 @@ export default {
      * Handle the input change from the geography search bar
      */
     handleGeographySelection({ name, type }) {
+      // Format the type
       type = type.toLowerCase();
       if (type == "neighborhood tract") type = "tract";
-      this.selectedGeographyType = type;
-      this.selectedGeographyName = name;
+
+      // Welcome pane to selected pane
+      // This is slow b/c of initial creation of 16 strip plots
+      if (this.selectedGeographyName === null) {
+        // Turn on the overlay while it loads
+        this.showOverlay = true;
+
+        // Update after short delay so overlay shows first
+        setTimeout(() => {
+          this.selectedGeographyType = type;
+          this.selectedGeographyName = name;
+        }, 50);
+      }
+      // Just update (strip plots are already loaded)
+      else {
+        this.selectedGeographyType = type;
+        this.selectedGeographyName = name;
+      }
     },
 
     /**

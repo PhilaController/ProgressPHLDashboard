@@ -10,9 +10,6 @@
       <geography-search-bar
         class="tw-text-xl"
         placeholder="Search"
-        :tract-features="geojson.tracts.features"
-        :neighborhood-names="neighborhoodNames"
-        :region-names="regionNames"
         :value="selectedGeographyName"
         :always-placeholder="false"
         @input="$emit('geography:select', $event)"
@@ -28,8 +25,6 @@
     >
       <social-progress-dropdown
         class="tw-text-base"
-        :hierarchy="hierarchy"
-        :aliases="aliases"
         :value="displayedVariable"
         label="Map variable"
         @input="$emit('update:map-variable', $event)"
@@ -53,21 +48,32 @@ import { scaleDiverging } from "d3-scale";
 import { interpolateRdYlGn } from "d3-scale-chromatic";
 import { group } from "d3-array";
 import { format } from "d3-format";
+import { mapState } from "vuex";
 
 export default {
   name: "ExplorerMap",
-  props: [
-    "data",
-    "geojson",
-    "hierarchy",
-    "aliases",
-    "displayedVariable",
-    "selectedGeographyName",
-    "selectedGeographyType",
-    "neighborhoodNames",
-    "regionNames",
-    "focusedIds",
-  ],
+  props: {
+
+    /**
+     * Name of the variable displayed on the map
+     */
+    displayedVariable: {type: String, required: true},
+
+    /**
+     * Name of selected geography
+     */
+    selectedGeographyName: {type: String},
+
+    /**
+     * Type of selected geography
+     */
+    selectedGeographyType: {type: String},
+
+    /**
+     * Array of geoids for focused tracts
+     */
+    focusedIds: {type: Array}
+  },
   components: { LoadingOverlay, GeographySearchBar, SocialProgressDropdown },
   data() {
     return {
@@ -75,15 +81,6 @@ export default {
        * Is the map fully loaded?
        * */
       loaded: false,
-
-      /**
-       * Dimension names
-       */
-      dimensionNames: [
-        "basic_human_needs",
-        "foundations_of_wellbeing",
-        "opportunity",
-      ],
 
       /**
        * The hovered and clicked IDs
@@ -128,6 +125,16 @@ export default {
     this.initializeMap();
   },
   computed: {
+    // Get the state from
+    ...mapState([
+      "data",
+      "metadata",
+      "geojson",
+      "dimensionNames",
+      "neighborhoodNames",
+      "regionNames",
+    ]),
+
     /**
      * The map's diverging color scale
      */
@@ -147,7 +154,7 @@ export default {
      * Alias for displayed name
      */
     displayedVariableName() {
-      return this.aliases[this.displayedVariable];
+      return this.metadata.aliases[this.displayedVariable];
     },
 
     /**
@@ -163,8 +170,8 @@ export default {
         out.push(dimension);
 
         // Loop over the components
-        for (let j = 0; j < this.hierarchy[dimension].length; j++) {
-          let component = this.hierarchy[dimension][j];
+        for (let j = 0; j < this.metadata.hierarchy[dimension].length; j++) {
+          let component = this.metadata.hierarchy[dimension][j];
           out.push(component);
         }
       }
@@ -175,7 +182,7 @@ export default {
      * Aliased (display) variable names
      */
     displayVariableNames() {
-      return this.variableNames.map((d) => this.aliases[d]);
+      return this.variableNames.map((d) => this.metadata.aliases[d]);
     },
 
     /**
@@ -277,7 +284,7 @@ export default {
 
           // Loaded
           this.loaded = true;
-          this.$emit("loaded")
+          this.$emit("loaded");
         });
 
         // Handle hover tracking
@@ -583,7 +590,7 @@ export default {
     >
       <div class="tw-text-base">${d.neighborhood_name} ${d.tract_id}</div>
     </div>
-    <div class="tw-mx-auto tw-text-center tw-text-2xl tw-font-bold">
+    <div class="tw-mx-auto tw-text-center tw-text-2xl tw-font-semibold">
       ${v}
     </div>
   </div>`;

@@ -6,7 +6,7 @@
     >
       <i class="far fa-chart-bar tw-mr-1.5 tw-text-3xl"></i>
 
-      <div class="tw-text-2xl tw-font-bold">{{ title }}</div>
+      <div class="tw-text-2xl tw-font-semibold">Indicators</div>
     </div>
 
     <!-- Intro text -->
@@ -147,35 +147,42 @@ import AgeSexChart from "./AgeSexChart";
 import { format } from "d3-format";
 import { group } from "d3-array";
 
-function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
 export default {
   name: "IndicatorsSection",
-  props: ["data", "selectedGeographyName", "selectedGeographyType"],
-  components: { LoadingOverlay, RaceEthnicityChart, AgeSexChart },
+  props: {
+    /**
+     * Name of selected geography name
+     */
+    selectedGeographyName: { type: String },
 
-  methods: {
-    getVariable(variable) {
-      return this.data.find((d) => d.indicator === variable)["estimate"];
-    },
-    formatPopulation(value) {
-      let fmt = ",.1f";
-      if (value < 1e4) fmt = ",.2f";
-      return format(fmt)(value / 1e3) + "k";
-    },
-    formatIncome(value) {
-      return "$" + format(",.0f")(value);
-    },
-    formatPercent(value) {
-      return format(".1f")(value) + "%";
+    /**
+     * Type of selected geography name
+     */
+    selectedGeographyType: { type: String },
+  },
+  components: { LoadingOverlay, RaceEthnicityChart, AgeSexChart },
+  data() {
+    return { data: null };
+  },
+  /**
+   * When created, fetch the initial data
+   */
+  created() {
+    this.setData(this.selectedGeographyName);
+  },
+
+  watch: {
+    /**
+     * Set new data when selection changes
+     */
+    selectedGeographyName(name) {
+      if (name) {
+        this.setData(name);
+      }
     },
   },
+
   computed: {
-    title() {
-      return "Indicators"; //capitalizeFirstLetter(this.selectedGeographyType) + " Indicators";
-    },
     population_2010() {
       return this.getVariable("population_2010");
     },
@@ -267,6 +274,43 @@ export default {
         out.push(r);
       }
       return out;
+    },
+  },
+  methods: {
+    /**
+     * Set the data for the input name, optionally fetching it if needed
+     */
+    setData(name) {
+      let d = this.$store.state.indicatorsDataCache[name];
+      if (!d) {
+        this.$store
+          .dispatch("fetchIndicatorsData", { name })
+          .then((data) => (this.data = data));
+      } else {
+        this.data = d;
+      }
+    },
+
+    /**
+     * Get the data for the specified variable
+     */
+    getVariable(variable) {
+      return this.data.find((d) => d.indicator === variable)["estimate"];
+    },
+
+    /**
+     * Format population value
+     */
+    formatPopulation(value) {
+      let fmt = ",.1f";
+      if (value < 1e4) fmt = ",.2f";
+      return format(fmt)(value / 1e3) + "k";
+    },
+    formatIncome(value) {
+      return "$" + format(",.0f")(value);
+    },
+    formatPercent(value) {
+      return format(".1f")(value) + "%";
     },
   },
 };

@@ -274,11 +274,14 @@ export default {
      */
     drawChart() {
       // Create svg if we need to
+      let emit = false;
       if (!this.svg) {
         this.svg = select(this.$el)
           .append("svg")
           .attr("width", this.width)
           .attr("height", this.height);
+
+        emit = true;
       }
 
       // Remove any existing
@@ -384,6 +387,8 @@ export default {
             circle.call(t.setFocusedStyle);
           } else circle.call(t.setHiddenStyle);
         });
+
+      if (emit) this.$emit("ready");
     },
   },
 

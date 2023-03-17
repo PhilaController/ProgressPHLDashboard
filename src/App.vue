@@ -1,26 +1,11 @@
 <template>
   <div id="app">
-    <router-view
-      :key="$route.path"
-      :data="data"
-      :metadata="metadata"
-      :geojson="geojson"
-      :controller-nav-height="controllerNavHeight"
-      :use-padding="usePadding"
-      :nav-bar-height="52"
-    />
+    <router-view :key="$route.path" />
   </div>
 </template>
 
 <script>
-import { queryFeatureServer } from "@/utils";
-import { json } from "d3-fetch";
 import $ from "jquery";
-
-const VERSION = "2";
-const ARCGIS_URL =
-  "https://services.arcgis.com/fLeGjb7u4uXqeF9q/arcgis/rest/services";
-const S3_URL = `https://spi-dashboard-data.s3.amazonaws.com/v${VERSION}/`;
 
 export default {
   name: "App",
@@ -32,91 +17,18 @@ export default {
       observer: null,
 
       /**
-       * Main, tract-level SPI data
+       * Data cache for indicators
        */
-      data: null,
-
-      /**
-       * SPI metadata dict
-       */
-      metadata: null,
-
-      /**
-       * Dict of geojson sources
-       */
-      geojson: null,
-
-      /**
-       * Config for downloading geojson layers
-       */
-      geojsonSourceConfig: [
-        {
-          name: "tracts",
-          url: `${ARCGIS_URL}/SPI_Dashboard_Census_Tracts/FeatureServer/0`,
-          outFields: [
-            "geoid",
-            "neighborhood_name",
-            "puma_name",
-            "tract_id",
-            "missing",
-          ],
-        },
-        {
-          name: "cityLimits",
-          url: `${ARCGIS_URL}/SPI_Dashboard_City_Limits/FeatureServer/0`,
-        },
-        {
-          name: "hoods",
-          url: `${ARCGIS_URL}/SPI_Dashboard_Neighborhoods/FeatureServer/0`,
-          outFields: ["neighborhood_name"],
-        },
-        {
-          name: "pumas",
-          url: `${ARCGIS_URL}/SPI_Dashboard_PUMAs/FeatureServer/0`,
-          outFields: ["puma_name"],
-        },
-      ],
+      indicatorsDataCache: {},
     };
-  },
-  computed: {
-    /**
-     * Names of geojson sources
-     */
-    geojsonSourceNames() {
-      return this.geojsonSourceConfig.map((d) => d.name);
-    },
   },
 
   /**
    * Fetch the data on creation (synchronously)
    */
   created() {
-    // Fetch the indicators and metadata
-    json(S3_URL + "spi-data.json").then((data) => (this.data = data));
-    json(S3_URL + "spi-metadata.json").then((data) => (this.metadata = data));
-
-    // Get the geojson query promises
-    let queries = [];
-    for (let i = 0; i < this.geojsonSourceConfig.length; i++) {
-      let config = this.geojsonSourceConfig[i];
-      let promise = queryFeatureServer({
-        url: config.url,
-        outFields: config.outFields,
-      });
-      queries.push(promise);
-    }
-
-    // Save when all are resolved
-    Promise.allSettled(queries).then((results) => {
-      // Loop over the results and store them
-      let geojson = {};
-      results.forEach((result, i) => {
-        geojson[this.geojsonSourceNames[i]] = result.value;
-      });
-
-      // Save it
-      this.geojson = geojson;
-    });
+    const fetchers = ["fetchSPIData", "fetchSPIMetadata", "fetchGeojson"];
+    fetchers.map((functionName) => this.$store.dispatch(functionName));
   },
 
   /**
@@ -125,10 +37,23 @@ export default {
   mounted() {
     // Track the controller.phila.gov nav height
     const observer = new ResizeObserver(() => {
+      // Get the controller nav
       const el = $("#site-navigation");
-      this.controllerNavHeight = el.outerHeight();
-      this.usePadding = el.css("position") !== "static";
+
+      // Save the height
+      this.$store.commit("setValue", {
+        key: "controllerNavHeight",
+        value: el.outerHeight(),
+      });
+
+      // Do we need to use padding? — depends on controller layout / mobile
+      this.$store.commit("setValue", {
+        key: "usePadding",
+        value: el.css("position") !== "static",
+      });
     });
+
+    // Set up the observer
     observer.observe(document.getElementById("site-navigation"));
     this.observer = observer;
   },
@@ -139,6 +64,21 @@ export default {
   beforeDestroy() {
     if (this.observer)
       this.observer.unobserve(document.getElementById("site-navigation"));
+  },
+
+  methods: {
+    /**
+     * Get the census data indicators
+     */
+    // async getIndicatorData(name) {
+    //   // Get the data from the cache
+    //   let data = this.indicatorsDataCache[name];
+    //   // Pull the data if we need to
+    //   if (!data) {
+    //     const url = `${S3_URL}/census-data/${name}.json`;
+    //     this.indicatorsDataCache[name] = await json(url);
+    //   }
+    // },
   },
 };
 </script>

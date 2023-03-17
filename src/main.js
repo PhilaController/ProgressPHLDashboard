@@ -1,6 +1,7 @@
 import Vue from "vue";
 import App from "@/App";
 import router from "@/plugins/router";
+import store from "@/plugins/store";
 import vClickOutside from "./directives/vClickOutside.js";
 import "@/main.css";
 import $ from "jquery";
@@ -91,6 +92,7 @@ content.html(`<div id="app"></div>`);
 
 new Vue({
   router,
+  store,
   render: (h) => h(App),
 }).$mount("#app");
 
