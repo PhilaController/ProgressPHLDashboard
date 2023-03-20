@@ -1,11 +1,11 @@
 <template>
-  <div class="tw-h-full tw-w-full">
+  <div class="tw-w-full">
     <!-- Map -->
     <div class="tw-relative tw-mt-6">
       <!-- Map Legend -->
       <div
         v-if="colorScale"
-        class="tw-absolute tw-z-[7] tw-m-2 tw-rounded tw-border tw-border-zinc-800 tw-bg-stone-100 tw-p-2"
+        class="tw-absolute tw-z-[7] tw-m-2 tw-max-w-[300px] tw-rounded tw-border tw-border-zinc-800 tw-bg-stone-100 tw-p-2"
       >
         <div class="tw-text-sm tw-font-semibold tw-text-zinc-800">
           {{ selectedVariableAlias }}

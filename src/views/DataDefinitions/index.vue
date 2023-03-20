@@ -1,13 +1,8 @@
 <template>
-  <content-wrapper
-    :controller-nav-height="controllerNavHeight"
-    :use-padding="usePadding"
-    :nav-bar-height="navBarHeight"
-    :is-loading="isLoading"
-  >
+  <content-wrapper :is-loading="isLoading">
     <div
       v-if="!isLoading"
-      class="tw-relative tw-mx-auto tw-w-full tw-max-w-5xl tw-pb-10 sm:tw-px-4"
+      class="tw-relative tw-mx-auto tw-w-full tw-max-w-5xl sm:tw-px-4"
     >
       <!-- Overlay -->
       <loading-overlay v-if="!mapLoaded" />
@@ -24,7 +19,7 @@
 
       <!-- Indicator map -->
       <indicator-map
-        class="tw-mt-10 tw-px-2 sm:tw-px-0"
+        class="tw-mt-10 tw-px-2 tw-pb-20 sm:tw-px-0"
         ref="indicatorMap"
         v-if="selectedVariable && selectedDimension"
         :data="data"
@@ -45,40 +40,10 @@ import ContentWrapper from "@/components/ContentWrapper";
 import LoadingOverlay from "@/components/Loading/LoadingOverlay";
 import DefinitionsTable from "./DefinitionsTable";
 import IndicatorMap from "./IndicatorMap";
+import { mapState } from "vuex";
 
 export default {
   name: "DataDefinitions",
-  props: {
-    /**
-     * The height of the ProgressPHL navbar in pixels
-     */
-    navBarHeight: { type: Number },
-
-    /**
-     * The height of the controller.phila.gov navbar in pixels
-     */
-    controllerNavHeight: { type: Number },
-
-    /**
-     * Do we need top padding
-     */
-    usePadding: { type: Boolean },
-
-    /**
-     * The geojson collections
-     */
-    geojson: { type: Object },
-
-    /**
-     * SPI data
-     */
-    data: { type: Object },
-
-    /**
-     * Metadata for SPI
-     */
-    metadata: { type: Object },
-  },
   components: {
     LoadingOverlay,
     ContentWrapper,
@@ -100,6 +65,8 @@ export default {
   },
 
   computed: {
+    ...mapState(["data", "metadata", "geojson"]),
+
     selectedVariable() {
       return this.$route.query.value;
     },

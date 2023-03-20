@@ -138,6 +138,11 @@ export default new Vuex.Store({
       "opportunity",
     ],
 
+    /**
+     * Tract names for scorecards
+     */
+    scorecardTractNames: [],
+
     // Map from regions to neighborhoods and vice versa
     regionsToHoods: require("@/data/regionsToHoods"),
     hoodsToRegions: require("@/data/hoodsToRegions"),

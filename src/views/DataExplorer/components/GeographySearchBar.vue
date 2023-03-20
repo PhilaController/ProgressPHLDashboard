@@ -300,7 +300,7 @@ export default {
 
     if (option !== undefined) {
       // Set the default
-      this.selectedOptionLabel = option.label;
+      this.selectedOptionLabel = option.name;
     }
   },
   watch: {

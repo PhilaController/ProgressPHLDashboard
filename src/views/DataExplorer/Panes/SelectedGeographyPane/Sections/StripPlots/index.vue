@@ -49,7 +49,10 @@
       </p>
 
       <!-- Subheader -->
-      <p class="tw-mt-4">
+      <div class="tw-mt-4 tw-text-sm tw-font-semibold tw-underline">
+        Chart Guide
+      </div>
+      <p class="tw-mt-0.5">
         <template v-if="selectedGeographyType == 'tract'">
           In the charts below, the score for the
           <span class="tw-font-medium">{{ selectedGeographyName }}</span>
@@ -243,74 +246,30 @@ export default {
   },
   data() {
     return {
+      /**
+       * Count how many strip plots have loaded (16 total)
+       */
       loadedCharts: 0,
+
+      /**
+       * Variables for scorecard popup
+       */
       modalShowing: false,
       scorecardValue: null,
-      /**
-       * Variable names for dimensions
-       */
-      dimensionNames: [
-        "basic_human_needs",
-        "foundations_of_wellbeing",
-        "opportunity",
-      ],
-
-      /**
-       * Expanded dimensions
-       */
-      expandedDimensions: [],
-
-      /**
-       * Questions for each dimension
-       */
-      questions: {
-        basic_human_needs:
-          "Are Philadelphians' most essential needs being met?",
-        foundations_of_wellbeing:
-          "Are the building blocks in place for Philadelphians to enhance and sustain their wellbeing?",
-        opportunity:
-          "Is there opportunity for all Philadelphians to reach their full potential?",
-      },
-
-      /**
-       * Component descriptions
-       */
-      componentDescriptions: {
-        nutrition_and_medical_care:
-          "includes indicators tracking dental care, preventative health care, and food stamp usage.",
-        water_and_sanitation:
-          "includes indicators tracking plumbing usage, impervious surfaces, and violations of Environmental Protection Agency regulations.",
-        shelter:
-          "includes indicators tracking evictions, housing crowdedness, and housing cost burdens.",
-        personal_safety:
-          "includes indicators tracking the rates of property crime, violent crime, and car accidents.",
-        basic_knowledge_access:
-          "includes indicators tracking educational attainment, preschool enrollment, and student proficiency in math and language arts.",
-        info_comms_access:
-          "includes indicators tracking internet access and type, and broadband upload and download speeds.",
-        health_and_wellness:
-          "includes indicators tracking the prevalence of cancer, heart disease, obesity, and poor mental health.",
-        environmental_quality:
-          "includes indicators tracking air quality and tree canopy loss.",
-        personal_rights:
-          "includes indicators tracking home ownership, voter registration, and voter turnout.",
-        personal_freedom_and_choice:
-          "includes indicators tracking the prevalance of non-vehicle commuters, walkability, disconnected youth, and dependents over the age of 65.",
-        inclusiveness:
-          "includes indicators tracking commute times, gender labor force participation and pay gaps, and residential isolation and segregation.",
-        advanced_education_access:
-          "includes indicators tracking educational attainment beyond the high school level.",
-      },
     };
   },
 
   watch: {
+    /**
+     * Emit event when chart has loaded
+     */
     loadedCharts(value) {
       this.$emit("loaded-charts", value);
     },
   },
   computed: {
-    ...mapState(["data", "metadata"]),
+    // Get variables from store
+    ...mapState(["data", "metadata", "dimensionNames"]),
 
     /**
      * Number of tracts in the selected geography
@@ -338,86 +297,6 @@ export default {
         return "tw-border-orange-400/75";
       else return "tw-border-green-400/75";
     },
-
-    /**
-     * Is the input dimension expanded?
-     */
-    isExpanded(name) {
-      return this.expandedDimensions.includes(name);
-    },
-
-    /**
-     * Expand the input dimension
-     */
-    expandDimension(name) {
-      this.expandedDimensions.push(name);
-    },
-
-    /**
-     * Collapse the input dimension
-     */
-    collapseDimension(name) {
-      this.expandedDimensions = this.expandedDimensions.filter(
-        (dim) => dim !== name
-      );
-    },
-
-    /**
-     * Get the text for the 'more options' popup
-     */
-    getMoreOptions(name) {
-      let out = [];
-      if (this.isExpanded(name)) out.push("Hide Component Scores");
-      else out.push("Show Component Scores");
-      out.push("Go to Definition");
-      return out;
-    },
-
-    /**
-     * Get the callback functions for the "more options" button
-     */
-    getMoreOptionsCallbacks(name) {
-      let out = [];
-      if (this.isExpanded(name)) out.push(() => this.collapseDimension(name));
-      else out.push(() => this.expandDimension(name));
-      out.push(() => this.goToDefinition(name));
-      return out;
-    },
-
-    /**
-     * Go the specified definition page
-     */
-    goToDefinition(value) {
-      this.$router.push({
-        path: "/definitions",
-        query: { value: value },
-      });
-    },
-
-    /**
-     * The list of classes for the component (optionally hidden)
-     */
-    getComponentClasses(dimension) {
-      let out = this.getBorderColorByDimension(dimension);
-      if (!this.isExpanded(dimension)) out += " tw-hidden";
-      return out;
-    },
-
-    /**
-     * Get the list of components in a dimension
-     */
-    getComponentList(dimension) {
-      let h = this.metadata.hierarchy[dimension];
-      let out = "";
-      for (let i = 0; i < h.length; i++) {
-        out += `<span class='tw-font-medium'>${
-          this.metadata.aliases[h[i]]
-        }</span>`;
-        if (i !== h.length - 1) out += "; ";
-        if (i === h.length - 2) out += "and ";
-      }
-      return out;
-    },
   },
 };
 </script>
@@ -425,12 +304,5 @@ export default {
 <style>
 #strip-plots-container {
   grid-template-columns: auto minmax(0, 1fr);
-}
-
-. {
-  grid-area: ;
-}
-. {
-  grid-area: ;
 }
 </style>

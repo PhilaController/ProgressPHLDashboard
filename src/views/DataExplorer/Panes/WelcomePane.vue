@@ -48,7 +48,7 @@
       </div>
 
       <!-- Right/bottom -->
-      <div class="tw-mt-8 tw-w-full tw-px-4 sm:tw-px-8 lg:tw-mt-0 lg:tw-w-4/12">
+      <div class="tw-mt-8 tw-w-full tw-px-4 sm:tw-px-4 lg:tw-mt-0 lg:tw-w-4/12">
         <div
           class="tw-flex tw-flex-col tw-gap-8 tw-text-base md:tw-flex-row lg:tw-flex-col"
         >

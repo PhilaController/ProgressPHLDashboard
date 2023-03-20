@@ -53,26 +53,25 @@ import { mapState } from "vuex";
 export default {
   name: "ExplorerMap",
   props: {
-
     /**
      * Name of the variable displayed on the map
      */
-    displayedVariable: {type: String, required: true},
+    displayedVariable: { type: String, required: true },
 
     /**
      * Name of selected geography
      */
-    selectedGeographyName: {type: String},
+    selectedGeographyName: { type: String },
 
     /**
      * Type of selected geography
      */
-    selectedGeographyType: {type: String},
+    selectedGeographyType: { type: String },
 
     /**
      * Array of geoids for focused tracts
      */
-    focusedIds: {type: Array}
+    focusedIds: { type: Array },
   },
   components: { LoadingOverlay, GeographySearchBar, SocialProgressDropdown },
   data() {
@@ -520,7 +519,7 @@ export default {
         });
 
         // Determine padding
-        let padding = { top: 75, left: 25, right: 25, bottom: 75 };
+        let padding = { top: 75, left: 25, right: 25, bottom: 125 };
 
         // Zoom
         this.map.fitBounds(thisBbox, {

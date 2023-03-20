@@ -49,7 +49,6 @@
           :selected-geography-type="selectedGeographyType"
           :focused-ids="focusedIds"
           :hovered-id="hoveredId"
-          :scorecard-tracts="scorecardComparisonTracts"
           @comparison:add="handleComparisonAdd"
           @comparison:reset="handleComparisonReset"
           @comparison:remove="handleComparisonRemove"
@@ -88,11 +87,6 @@ export default {
   data() {
     return {
       /**
-       * Names of tracts for scorecard comparison
-       */
-      scorecardComparisonTracts: [],
-
-      /**
        * Should we show an overlay
        */
       showOverlay: true,
@@ -119,11 +113,6 @@ export default {
        * What variable is currently mapped
        */
       mappedVariable: "social_progress_index",
-
-      /**
-       * Data cache for scatter chart
-       */
-      scatterChartDataCache: {},
     };
   },
 
@@ -168,6 +157,7 @@ export default {
       "geojson",
       "neighborhoodNames",
       "regionNames",
+      "scorecardTractNames",
     ]),
 
     /**
@@ -211,6 +201,13 @@ export default {
     },
   },
 
+  beforeDestroy() {
+    this.$store.commit("setValue", {
+      key: "scorecardTractNames",
+      value: [],
+    });
+  },
+
   methods: {
     handleChartLoad(value) {
       this.loadedCharts = value;
@@ -221,15 +218,30 @@ export default {
      */
     handleComparisonAdd(name) {
       if (!name) name = this.selectedGeographyName;
-      if (!this.scorecardComparisonTracts.includes(name))
-        this.scorecardComparisonTracts.push(name);
+
+      let names = this.scorecardTractNames;
+      if (!names.includes(name)) {
+        // Add it
+        let out = [...names];
+        out.push(name);
+        console.log("HEY", out);
+
+        // Save it
+        this.$store.commit("setValue", {
+          key: "scorecardTractNames",
+          value: out,
+        });
+      }
     },
 
     /**
      * Handle comparison reset
      */
     handleComparisonReset() {
-      this.scorecardComparisonTracts = [];
+      this.$store.commit("setValue", {
+        key: "scorecardTractNames",
+        value: [],
+      });
     },
 
     /**
@@ -237,9 +249,12 @@ export default {
      */
     handleComparisonRemove(name) {
       if (!name) name = this.selectedGeographyName;
-      this.scorecardComparisonTracts = this.scorecardComparisonTracts.filter(
-        (d) => d !== name
-      );
+
+      // Save it
+      this.$store.commit("setValue", {
+        key: "scorecardTractNames",
+        value: this.scorecardTractNames.filter((d) => d !== name),
+      });
     },
 
     /**

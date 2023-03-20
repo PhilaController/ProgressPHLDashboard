@@ -74,7 +74,7 @@
               <font-awesome-layers-text
                 v-show="showScorecardBadge"
                 counter
-                :value="selectedTracts ? selectedTracts.length : 0"
+                :value="scorecardTractNames ? scorecardTractNames.length : 0"
                 position="top-right"
                 class="scorecard-badge"
               />
@@ -105,6 +105,7 @@
 
 <script>
 import IconDropdown from "./Dropdowns/IconDropdown";
+import { mapState } from "vuex";
 
 export default {
   name: "Navbar",
@@ -114,11 +115,6 @@ export default {
      * Height of the navbar
      */
     height: { type: Number, required: true },
-
-    /**
-     * Selected tracts
-     */
-    selectedTracts: { type: Array },
   },
 
   data() {
@@ -129,6 +125,8 @@ export default {
   },
 
   computed: {
+    ...mapState(["scorecardTractNames"]),
+
     useFullNavbar() {
       if (this.$mq == "mobile") return false;
       else if (this.$mq == "sm") return false;
@@ -174,7 +172,8 @@ export default {
 
     showScorecardBadge() {
       return (
-        this.selectedTracts !== undefined && this.selectedTracts.length > 0
+        this.scorecardTractNames !== undefined &&
+        this.scorecardTractNames.length > 0
       );
     },
   },
@@ -183,7 +182,7 @@ export default {
     goTo(page) {
       let path = `/${page}`;
       if (page === "scorecards" && this.showScorecardBadge) {
-        path = `${page}/${this.selectedTracts.join("/")}`;
+        path = `${page}/${this.scorecardTractNames.join("/")}`;
       }
       if (this.$route.path !== path) this.$router.push(path);
     },

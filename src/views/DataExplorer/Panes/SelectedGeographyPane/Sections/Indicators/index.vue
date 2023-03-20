@@ -65,7 +65,7 @@
                 {{ formatPopulation(population) }}
               </div>
               <div class="tw-mt-2 tw-text-center tw-text-sm">
-                2014-2019 Estimate
+                2015-2019 Estimate
                 <span class="tw-text-gray-500">({{ population_change }})</span>
               </div>
             </div>

@@ -56,8 +56,8 @@
 
 <script>
 import { format } from "d3-format";
-import ScorecardCircle from "./ScorecardCircle";
-import ClickableIcon from "../ClickableIcon";
+import ClickableIcon from "@/components/ClickableIcon";
+import ScorecardCircle from "../../components/ScorecardCircle";
 
 export default {
   name: "DataRowDouble",
@@ -120,7 +120,7 @@ export default {
      */
     showHelp: { type: Boolean, default: false },
   },
-  components: { ScorecardCircle, ClickableIcon },
+  components: { ClickableIcon, ScorecardCircle },
   computed: {
     /**
      * Tracts

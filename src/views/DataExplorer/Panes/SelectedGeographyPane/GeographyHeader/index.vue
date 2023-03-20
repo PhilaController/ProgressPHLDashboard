@@ -129,6 +129,20 @@
             >
               <i class="fas fa-minus-circle"></i>
             </span>
+            <span
+              class="tw-ml-0.5 tw-text-[#0F7582]/75 hover:tw-cursor-pointer hover:tw-text-[#0F7582]"
+              :class="{
+                disabled: isDisabled('times'),
+              }"
+              title="Clear scorecard comparison"
+              role="button"
+              tabindex="0"
+              @click.prevent="handleTimesClick"
+              @keydown.enter.prevent="handleTimesClick"
+              @keydown.space.prevent="handleTimesClick"
+            >
+              <i class="fas fa-times-circle"></i>
+            </span>
           </div>
         </div>
       </div>
@@ -157,11 +171,6 @@ export default {
      * Type of selected geography name
      */
     selectedGeographyType: { type: String },
-
-    /**
-     * Names of tracts selected for scorecard page
-     */
-    scorecardTracts: { type: Array },
   },
   components: {
     NeighborhoodSubheader,
@@ -206,6 +215,7 @@ export default {
       "geojson",
       "regionsToHoods",
       "hoodsToRegions",
+      "scorecardTractNames",
     ]),
 
     /**
@@ -230,18 +240,27 @@ export default {
     handleMinusClick() {
       if (!this.isDisabled("minus")) this.$emit("comparison:remove");
     },
+    handleTimesClick() {
+      if (!this.isDisabled("times")) this.$emit("comparison:reset");
+    },
     isDisabled(kind) {
       if (kind === "minus")
         return (
-          this.scorecardTracts === undefined ||
-          !this.scorecardTracts.includes(this.selectedGeographyName)
+          this.scorecardTractNames === undefined ||
+          !this.scorecardTractNames.includes(this.selectedGeographyName)
         );
-      else
+      else if (kind === "plus")
         return (
-          this.scorecardTracts !== undefined &&
-          (this.scorecardTracts.length == 2 ||
-            this.scorecardTracts.includes(this.selectedGeographyName))
+          this.scorecardTractNames !== undefined &&
+          (this.scorecardTractNames.length == 2 ||
+            this.scorecardTractNames.includes(this.selectedGeographyName))
         );
+      else {
+        return (
+          this.scorecardTractNames === undefined ||
+          this.scorecardTractNames.length === 0
+        );
+      }
     },
     /**
      * Return the properties for the tract feature with the input name

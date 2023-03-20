@@ -48,8 +48,8 @@
 
     <!-- Title -->
     <div class="tw-mt-6 tw-px-4 sm:tw-px-0">
-      <div class="tw-pb-2 tw-text-base tw-font-semibold">
-        Chart Interactions
+      <div class="tw-pb-2 tw-text-sm tw-font-semibold tw-underline">
+        Chart Guide
       </div>
 
       <p class="tw-text-sm">
@@ -77,8 +77,9 @@
 
     <!-- Chart options -->
     <div class="tw-mt-6 tw-px-4 sm:tw-px-0">
-      <!-- Title -->
-      <div class="tw-pb-2 tw-text-base tw-font-semibold">Chart Options</div>
+      <div class="tw-pb-2 tw-text-sm tw-font-semibold tw-underline">
+        Chart Options
+      </div>
 
       <div class="tw-flex tw-w-full tw-flex-col tw-gap-10 md:tw-flex-row">
         <!-- X/Y dropdowns -->
@@ -196,7 +197,13 @@
       <div
         class="tw-absolute tw-top-0 tw-right-0 tw-z-[7] tw-w-[400px] tw-rounded tw-border tw-border-gray-300 tw-px-2 tw-py-1"
       >
-        <p v-if="scorecardTracts.length === 0" class="tw-text-sm tw-italic">
+        <p
+          v-if="
+            scorecardTractNames === undefined ||
+            scorecardTractNames.length === 0
+          "
+          class="tw-text-sm tw-italic"
+        >
           No tracts selected for scorecard comparison. To add a tract, hold
           command
           <span>(<command-icon />)</span>
@@ -204,7 +211,9 @@
         </p>
         <p v-else class="tw-text-sm tw-italic">
           Tracts selected for scorecard comparison:<br />
-          <span class="tw-font-medium">{{ scorecardTracts.join(", ") }}</span>
+          <span class="tw-font-medium">{{
+            scorecardTractNames.join(", ")
+          }}</span>
           <span
             class="tw-ml-3 tw-font-semibold tw-text-[#0F7582]/80 visited:tw-text-[#0F7582]/80 hover:tw-cursor-pointer hover:tw-text-[#0F7582] hover:tw-underline focus:tw-outline-none active:tw-text-[#0F7582]"
             @click.prevent="handleScorecardTractReset"
@@ -249,12 +258,7 @@ import { mapState } from "vuex";
 
 export default {
   name: "TrendsSection",
-  props: [
-    "selectedGeographyName",
-    "selectedGeographyType",
-    "focusedIds",
-    "scorecardTracts",
-  ],
+  props: ["selectedGeographyName", "selectedGeographyType", "focusedIds"],
   components: {
     ScatterChart,
     Dropdown,
@@ -364,7 +368,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(["data", "metadata"]),
+    ...mapState(["data", "metadata", "scorecardTractNames"]),
 
     tickFormatter() {
       // Format $
@@ -475,9 +479,9 @@ export default {
      * Handle right click
      */
     handleRightClick({ name }) {
-      if (this.scorecardTracts.includes(name))
+      if (this.scorecardTractNames.includes(name))
         this.$emit("comparison:remove", name);
-      else if (this.scorecardTracts.length < 2) {
+      else if (this.scorecardTractNames.length < 2) {
         this.$emit("comparison:add", name);
       }
     },

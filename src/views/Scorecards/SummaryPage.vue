@@ -1,68 +1,18 @@
 <template>
-  <!-- Show a loader -->
-  <loading-page v-if="isLoading" />
-
-  <!-- If data is loaded, show the definitions content -->
-  <div
-    v-else
-    class="tw-relative tw-flex tw-flex-col"
-    :style="getPaddingTop(controllerNavHeight)"
-  >
-    <!-- Navbar -->
-    <navbar :height="navBarHeight" />
-
-    <!-- The top section -->
+  <content-wrapper :is-loading="isLoading">
     <div
+      v-if="!isLoading"
       class="tw-relative tw-mx-auto tw-mt-4 tw-w-full tw-max-w-5xl tw-pb-10 sm:tw-px-4"
-      :style="getPaddingTop(navBarHeight)"
     >
       <!-- Title -->
-      <div class="tw-flex">
-        <div class="tw-text-4xl tw-font-semibold">
-          Social Progress Scorecards
-        </div>
-
-        <div class="tw-ml-2 tw-flex tw-items-center tw-gap-1.5">
-          <scorecard-circle
-            class="tw-inline-block tw-h-6 tw-w-6 tw-align-middle"
-            label="Above Average"
-          /><scorecard-circle
-            class="tw-inline-block tw-h-6 tw-w-6 tw-align-middle"
-            label="Average"
-          /><scorecard-circle
-            class="tw-inline-block tw-h-6 tw-w-6 tw-align-middle"
-            label="Below Average"
-          />
-        </div>
-      </div>
+      <scorecard-title />
 
       <!-- Intro text -->
-      <div class="tw-mt-6 tw-text-base">
-        <p>
-          The social progress scorecard shows how scores for a particular tract
-          compare to other tracts in the city, color-coded according to whether
-          the value is above the city average
-          <scorecard-circle
-            class="tw-mb-2 tw-inline-block tw-h-4 tw-w-4 tw-align-middle"
-            label="Above Average"
-          />, close to the city average
-          <scorecard-circle
-            class="tw-mb-2 tw-inline-block tw-h-4 tw-w-4 tw-align-middle"
-            label="Average"
-          />, or below the city average
-          <scorecard-circle
-            class="tw-mb-2 tw-inline-block tw-h-4 tw-w-4 tw-align-middle"
-            label="Below Average"
-          />. Values are presented for both the SPI and its dimensions and
-          components, as well as the data indicators that make up each
-          component.
-        </p>
-
-        <p class="tw-mt-4">
-          To get started, select one or two tracts in the table below and hit
-          the "Go" button.
-        </p>
-      </div>
+      <intro-text class="tw-mt-6" />
+      <p class="tw-mt-4">
+        To get started, select one or two tracts in the table below and hit the
+        "Go" button.
+      </p>
 
       <!-- Filters/buttons -->
       <div class="tw-mt-8 tw-flex tw-flex-row tw-items-end tw-justify-between">
@@ -203,35 +153,36 @@
         </template>
       </vue-good-table>
     </div>
-  </div>
+  </content-wrapper>
 </template>
 
 <script>
+// Local
+import ContentWrapper from "@/components/ContentWrapper";
 import SocialProgressDropdown from "../DataExplorer/components/SocialProgressDropdown";
-import LoadingPage from "@/components/Loading/LoadingPage";
-import Navbar from "@/components/Navbar";
-import ScorecardCircle from "@/components/Scorecard/ScorecardCircle";
-import SortButton from "./SortButton";
+
+// Scorecard components
+import ScorecardTitle from "./components/ScorecardTitle";
+import SortButton from "./components/SortButton";
+import IntroText from "./components/IntroText";
+import ScorecardCircle from "./components/ScorecardCircle";
+
+// External
+import { mapState } from "vuex";
 import { format } from "d3-format";
 import { ascending, descending } from "d3-array";
 import { VueGoodTable } from "vue-good-table";
 
 export default {
   name: "ScorecardSummary",
-  props: [
-    "metadata",
-    "data",
-    "controllerNavHeight",
-    "navBarHeight",
-    "usePadding",
-  ],
   components: {
-    LoadingPage,
-    Navbar,
+    ContentWrapper,
+    ScorecardTitle,
     VueGoodTable,
-    ScorecardCircle,
     SortButton,
     SocialProgressDropdown,
+    IntroText,
+    ScorecardCircle,
   },
   created() {
     // Set selected data
@@ -241,16 +192,39 @@ export default {
   },
   data() {
     return {
+      /**
+       * Input search
+       */
       searchTerm: "",
+
+      /**
+       * Selected variable shown in table
+       */
       selectedVariable: "social_progress_index",
 
+      /**
+       * Track names of selected rows
+       */
       selectedRows: [],
+
+      /**
+       * Sorted data fed into the table
+       */
       selectedData: [],
+
+      /**
+       * Sort order, either asc or desc
+       */
       sortOrder: "desc",
     };
   },
 
   computed: {
+    ...mapState(["data", "metadata"]),
+
+    /**
+     * Config for table columns
+     */
     columns() {
       return [
         {
@@ -280,12 +254,19 @@ export default {
         },
       ];
     },
+
+    /**
+     * Can we show the page yet?
+     */
     isLoading() {
       return this.metadata == null || this.data == null;
     },
   },
 
   watch: {
+    /**
+     * When selected rows change, update route and checkboxes
+     */
     selectedRows(newValue) {
       let currentRouteSelection = this.$route.query.selected;
       let newValueEncoded = JSON.stringify(newValue);
@@ -303,43 +284,75 @@ export default {
       });
     },
 
+    /**
+     * Initialize on load
+     */
     isLoading(value) {
       if (!value) this.initialize();
     },
 
+    /**
+     * Handle changes to the sort order
+     */
     sortOrder() {
-      this.setSelectedData();
-      this.$nextTick(() => {
-        this.updateCheckboxes();
-      });
+      this.refreshTable();
     },
 
+    /**
+     * Handle changes to the data variable
+     */
     selectedVariable() {
-      this.setSelectedData();
-      this.$nextTick(() => {
-        this.updateCheckboxes();
-      });
+      this.refreshTable();
     },
   },
 
   methods: {
+    /**
+     * Refresh the table (data annd checkboxes)
+     */
+    refreshTable() {
+      // Update the selected data
+      this.setSelectedData();
+
+      // After render, update checkboxes
+      this.$nextTick(() => {
+        this.updateCheckboxes();
+      });
+    },
+
+    /**
+     * Go to the scorecards for the selected rows
+     */
     goToScorecard() {
       let path = this.selectedRows.join("/");
       this.$router.push({
         path: `/scorecards/${path}`,
       });
     },
+
+    /**
+     * Update the checkboxes if per page option is changed
+     */
     handlePerPageChange() {
       this.$nextTick(() => {
         this.updateCheckboxes();
       });
     },
+
+    /**
+     * Update checkboxes when page chan ges
+     */
     handlePageChange() {
       this.$nextTick(() => {
         this.updateCheckboxes();
       });
     },
+
+    /**
+     * Initialize the table
+     */
     initialize() {
+      // Set the data
       this.setSelectedData();
 
       // Check query
@@ -348,9 +361,17 @@ export default {
         this.selectedRows = JSON.parse(query);
       }
     },
+
+    /**
+     * Clear the selected rows
+     */
     clearSelections() {
       this.selectedRows = [];
     },
+
+    /**
+     * Sort the data for the selected variable and set it
+     */
     setSelectedData() {
       // Selected variable data
       let data = this.data[this.selectedVariable];
@@ -368,10 +389,9 @@ export default {
         .sort((a, b) => sortFn(a.value, b.value));
     },
 
-    isCheckboxEvent(event) {
-      if (!event.srcElement) return false;
-      return event.srcElement.nodeName === "INPUT";
-    },
+    /**
+     * Update the checkboxes using jquery
+     */
     updateCheckboxes() {
       let table = this.$refs.summaryTable;
       let start = (table.currentPage - 1) * table.currentPerPage;
@@ -382,8 +402,6 @@ export default {
 
         let d = this.$refs.summaryTable.processedRows[0].children[start + i];
         if (d === undefined) return;
-
-        console.log(d.tract_name, this.selectedRows.length === 2);
 
         // This row is selected
         if (this.selectedRows.includes(d.tract_name)) {
@@ -396,31 +414,47 @@ export default {
       });
     },
 
+    /**
+     * Update checkboxes after input search changes
+     */
     searchingTable() {
       this.$nextTick(() => {
         this.updateCheckboxes();
       });
     },
+
+    /**
+     * Get the tract name
+     */
     getTractName(d) {
       return `${d.neighborhood_name} ${+d.tract_id}`;
     },
 
+    /**
+     * Is the event related to the row's checkbox?
+     */
+    isCheckboxEvent(event) {
+      if (!event.srcElement) return false;
+      return event.srcElement.nodeName === "INPUT";
+    },
+
+    /**
+     * Handle row clicks
+     */
     onRowClick(params) {
+      // Make sure its from the checkbox
       if (this.isCheckboxEvent(params.event)) {
+        // Update the selected rows array
         let name = this.getTractName(params.row);
         if (!this.selectedRows.includes(name)) {
           this.selectedRows.push(name);
         } else this.selectedRows = this.selectedRows.filter((d) => d !== name);
-      } else {
-        console.log("FUCK");
+      }
+      // Do nothing
+      else {
         params.event.preventDefault();
         params.event.stopPropagation();
       }
-    },
-
-    getPaddingTop(padding) {
-      if (this.usePadding) return `padding-top: ${padding}px`;
-      else return "";
     },
   },
 };

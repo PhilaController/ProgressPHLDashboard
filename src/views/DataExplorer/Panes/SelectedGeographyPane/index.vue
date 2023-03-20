@@ -4,12 +4,12 @@
     <geography-header
       :selected-geography-name="selectedGeographyName"
       :selected-geography-type="selectedGeographyType"
-      :scorecard-tracts="scorecardTracts"
       @mounted="headerHeight = $event"
       @change:height="headerHeight = $event"
       @scroll="handleScroll"
       @comparison:add="$emit('comparison:add')"
       @comparison:remove="$emit('comparison:remove')"
+      @comparison:reset="$emit('comparison:reset')"
       @geography:reset="$emit('geography:reset')"
       @geography:select="$emit('geography:select', $event)"
       @geography:highlight="$emit('geography:highlight', $event)"
@@ -49,7 +49,6 @@
         :selected-geography-name="selectedGeographyName"
         :selected-geography-type="selectedGeographyType"
         :focused-ids="focusedIds"
-        :scorecard-tracts="scorecardTracts"
         @geography:select="$emit('geography:select', $event)"
         @geography:hover="$emit('geography:hover', $event)"
         @geography:unhover="$emit('geography:unhover')"
@@ -92,11 +91,6 @@ export default {
      * GEOID of hovered tract
      */
     hoveredId: { type: String },
-
-    /**
-     * Names of tracts selected for scorecard page
-     */
-    scorecardTracts: { type: Array },
   },
   components: {
     GeographyHeader,
