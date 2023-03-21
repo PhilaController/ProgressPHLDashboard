@@ -16,7 +16,7 @@ module.exports = defineConfig({
         main: "./src/main.js",
       },
       output: {
-        filename: "spi-dashboard.[name].[fullhash:7].js",
+        filename: "progressphl-dashboard.[name].[fullhash:7].js",
       },
       plugins: [
         new webpack.ProvidePlugin({
