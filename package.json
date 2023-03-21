@@ -1,5 +1,5 @@
 {
-  "name": "spi-dashboard",
+  "name": "progressphl-dashboard",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -35,6 +35,7 @@
     "d3-transition": "^3.0.1",
     "floating-vue": "^1.0.0-beta.18",
     "maplibre-gl": "^2.4.0",
+    "papaparse": "^5.4.0",
     "sass": "^1.55.0",
     "seedrandom": "^3.0.5",
     "simple-statistics": "^7.8.0",

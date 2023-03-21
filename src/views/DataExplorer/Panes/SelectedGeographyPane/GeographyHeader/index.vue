@@ -63,7 +63,7 @@
       />
 
       <!-- Buttons -->
-      <div class="tw-flex tw-items-center">
+      <div class="tw-flex tw-items-center" v-if="$mq !== 'mobile'">
         <!-- Reset -->
         <div class="tw-mr-2 tw-flex tw-flex-col">
           <div
@@ -94,7 +94,7 @@
         >
           <!-- Header -->
           <div
-            class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-gray-400"
+            class="tw-text-center tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-gray-400"
           >
             Compare
           </div>
@@ -147,7 +147,6 @@
         </div>
       </div>
     </div>
-    <!-- <div v-else class="tw-mb-4"></div> -->
   </div>
 </template>
 

@@ -92,7 +92,7 @@
 
     <!-- Charts part -->
     <div
-      class="tw-relative tw-mt-10 tw-grid tw-grid-cols-2 tw-gap-0"
+      class="tw-relative tw-mt-10 tw-grid tw-grid-cols-1 tw-gap-0"
       id="strip-plots-container"
     >
       <!-- SPI: Header -->
@@ -304,5 +304,11 @@ export default {
 <style>
 #strip-plots-container {
   grid-template-columns: auto minmax(0, 1fr);
+}
+
+@media screen and (max-width: 600px) {
+  #strip-plots-container {
+    grid-template-columns: auto;
+  }
 }
 </style>

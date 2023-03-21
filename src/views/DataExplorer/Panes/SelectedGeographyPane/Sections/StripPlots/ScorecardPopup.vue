@@ -105,11 +105,10 @@
 </template>
 
 <script>
-import HeaderRowSingle from "@/components/Scorecard/HeaderRowSingle";
-import DataRowSingle from "@/components/Scorecard/DataRowSingle";
+import HeaderRowSingle from "@/views/Scorecards/ComparisonPage/Single/HeaderRow";
+import DataRowSingle from "@/views/Scorecards/ComparisonPage/Single/DataRow";
 import CardModal from "@/components/CardModal";
-import ScorecardCircle from "@/components/Scorecard/ScorecardCircle";
-import $ from "jquery";
+import ScorecardCircle from "@/views/Scorecards/components/ScorecardCircle";
 
 export default {
   name: "ScorecardPopup",

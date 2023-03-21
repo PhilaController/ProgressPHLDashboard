@@ -6,7 +6,8 @@
       @click.self="close"
     >
       <div
-        class="tw-relative tw-max-h-[80vh] tw-w-full tw-max-w-2xl tw-overflow-y-scroll tw-rounded-lg tw-bg-white tw-p-8 tw-shadow-lg"
+        class="tw-relative tw-max-h-[80vh] tw-w-full tw-overflow-y-scroll tw-rounded-lg tw-bg-white tw-p-8 tw-shadow-lg"
+        :class="widthClass"
       >
         <button
           aria-label="close"
@@ -27,6 +28,11 @@ export default {
     showing: {
       required: true,
       type: Boolean,
+    },
+
+    widthClass: {
+      type: String,
+      default: "tw-max-w-2xl",
     },
   },
   watch: {

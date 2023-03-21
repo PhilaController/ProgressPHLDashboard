@@ -69,9 +69,11 @@
           are highlighted in red. To change the main tract selection, hover over
           and click on a specific circle in the chart.
         </template>
-        To add a tract to the scorecard comparison tab, hold command
-        <span>(<command-icon />)</span>
-        and click on a circle in the chart.
+        <span v-if="$mq !== 'mobile'"
+          >To add a tract to the scorecard comparison tab, hold command
+          <span>(<command-icon />)</span>
+          and click on a circle in the chart.</span
+        >
       </p>
     </div>
 
@@ -195,6 +197,7 @@
       class="tw-relative tw-mt-4 tw-flex tw-w-full tw-flex-col tw-justify-start tw-px-0 sm:tw-px-0"
     >
       <div
+        v-if="$mq !== 'mobile'"
         class="tw-absolute tw-top-0 tw-right-0 tw-z-[7] tw-w-[400px] tw-rounded tw-border tw-border-gray-300 tw-px-2 tw-py-1"
       >
         <p
@@ -322,6 +325,10 @@ export default {
   },
 
   watch: {
+    scorecardTractNames(value) {
+      if (value.length === 0)
+        this.$refs.scatterChart.resetRightClickSelection();
+    },
     /**
      * When selected comparison variable changes, pull new data
      */
