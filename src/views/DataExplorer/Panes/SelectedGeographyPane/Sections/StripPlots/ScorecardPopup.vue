@@ -1,5 +1,9 @@
 <template>
-  <card-modal :showing="showing" @close="$emit('close')">
+  <card-modal
+    :showing="showing"
+    widthClass="tw-max-w-3xl"
+    @close="$emit('close')"
+  >
     <!-- Content start -->
     <div class="tw-my-4 tw-flex tw-h-full tw-w-full tw-flex-col">
       <!-- Title-->

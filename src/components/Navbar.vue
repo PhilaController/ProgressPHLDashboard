@@ -5,39 +5,12 @@
     :style="`height: ${height}px`"
     id="phl-progress-navbar"
   >
-    <card-modal :showing="showDownloadPopup" widthClass="tw-max-w-lg">
-      <div
-        class="tw-my-4 tw-flex tw-h-full tw-min-h-[300px] tw-w-full tw-flex-col"
-      >
-        <!-- Title-->
-        <div class="tw-text-2xl tw-font-semibold">Download Data</div>
-
-        <div class="tw-mt-8">
-          <label class="tw-text-xs tw-italic"
-            >Choose variable to download</label
-          >
-          <dropdown
-            class="-tw-mt-1 tw-text-base"
-            :options="downloadOptions"
-            v-model="selectedDownloadOption"
-          />
-        </div>
-
-        <!-- Download button -->
-        <div class="tw-mt-10 tw-flex tw-w-full tw-justify-center">
-          <div
-            class="btn-default-colors tw-mt-4 tw-min-w-[100px] tw-rounded tw-border-[1px] tw-border-solid tw-px-3 tw-py-3 tw-text-center tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[2px] sm:tw-w-fit sm:tw-border-[2px] sm:tw-text-xs md:tw-text-sm"
-            role="button"
-            tabindex="0"
-            @click.prevent="downloadData"
-            @keydown.enter.prevent="downloadData"
-            @keydown.space.prevent="downloadData"
-          >
-            Download data
-          </div>
-        </div>
-      </div>
-    </card-modal>
+    <download-modal
+      :showing="showDownloadPopup"
+      :selected-geography-name="selectedGeographyName"
+      :selected-geography-type="selectedGeographyType"
+      @close="showDownloadPopup = false"
+    />
 
     <!-- Logo -->
     <div
@@ -139,41 +112,30 @@
 
 <script>
 import IconDropdown from "./Dropdowns/IconDropdown";
-import Dropdown from "./Dropdowns/Dropdown";
-import CardModal from "./CardModal";
+import DownloadModal from "./DownloadModal";
 import { mapState } from "vuex";
-import * as Papa from "papaparse";
-
-/***
- * Download the content to the specified file
- */
-export function downloadFile(content, contentType, fileName) {
-  // Create the link
-  const a = document.createElement("a");
-
-  // Create object to download
-  const file = new Blob([content], { type: contentType });
-  a.href = URL.createObjectURL(file);
-
-  // Set the file name
-  a.download = fileName;
-
-  // Trigger download
-  a.click();
-}
 
 export default {
   name: "Navbar",
-  components: { IconDropdown, CardModal, Dropdown },
+  components: { IconDropdown, DownloadModal },
   props: {
     /**
      * Height of the navbar
      */
     height: { type: Number, required: true },
+
+    /**
+     * Selected geography
+     */
+    selectedGeographyName: { type: String },
+    selectedGeographyType: { type: String },
   },
 
   data() {
     return {
+      /**
+       * Main navigation pages and icons
+       */
       pages: ["explorer", "scorecards", "definitions"],
       icons: ["fas fa-search", "fas fa-table", "fas fa-info-circle"],
 
@@ -181,19 +143,24 @@ export default {
        * Show download modal
        */
       showDownloadPopup: false,
-      selectedDownloadOption: "all_variables",
     };
   },
 
   computed: {
-    ...mapState(["scorecardTractNames", "metadata", "data"]),
+    ...mapState(["scorecardTractNames"]),
 
+    /**
+     * Whether to show the full navbar
+     */
     useFullNavbar() {
       if (this.$mq == "mobile") return false;
       else if (this.$mq == "sm") return false;
       else return true;
     },
 
+    /**
+     * Main menu options
+     */
     menuOptions() {
       let out = [
         "About",
@@ -204,6 +171,9 @@ export default {
       return out;
     },
 
+    /**
+     * Menu callbacks when clicked
+     */
     menuCallbacks() {
       return [
         () => this.goTo("about"),
@@ -219,13 +189,22 @@ export default {
       ];
     },
 
+    /**
+     * Menu options on mobile
+     */
     mobileMenuOptions() {
+      // Skip scorecards
       let out = this.pages
         .filter((d) => d !== "scorecards")
         .map((text) => text.replace(/(^\w|\s\w)/g, (m) => m.toUpperCase()));
+
+      // Combine pages and usual menu
       return out.concat(this.menuOptions);
     },
 
+    /**
+     * Mobile callbacks
+     */
     mobileMenuCallbacks() {
       let out = this.pages
         .filter((d) => d !== "scorecards")
@@ -233,79 +212,21 @@ export default {
       return out.concat(this.menuCallbacks);
     },
 
+    /**
+     * Are we showing the scorecard badge
+     */
     showScorecardBadge() {
       return (
         this.scorecardTractNames !== undefined &&
         this.scorecardTractNames.length > 0
       );
     },
-
-    /**
-     * SPI variable names
-     */
-    SPIVariables() {
-      let out = ["social_progress_index"];
-      const dimensions = this.metadata.hierarchy["social_progress_index"];
-
-      // Loop over dimensions and components and indicators
-      for (let i = 0; i < dimensions.length; i++) {
-        const dim = dimensions[i];
-        out.push(dim);
-        const components = this.metadata.hierarchy[dim];
-        for (let j = 0; j < components.length; j++) {
-          const component = components[j];
-          out.push(component);
-        }
-      }
-
-      return out;
-    },
-
-    downloadOptions() {
-      let out = [{ label: "All variables", value: "all_variables" }];
-      for (let i = 0; i < this.SPIVariables.length; i++) {
-        let variable = this.SPIVariables[i];
-        out.push({ label: this.metadata.aliases[variable], value: variable });
-      }
-      return out;
-    },
   },
 
   methods: {
     /**
-     * Download the data as a CSV
+     * Go to as specific page
      */
-    downloadData() {
-      // Which variables to download
-      let variables;
-      if (this.selectedDownloadOption === "all_variables")
-        variables = this.SPIVariables;
-      else variables = [this.selectedDownloadOption];
-
-      // Concat and add a variable column
-      let out = [];
-      for (let i = 0; i < variables.length; i++) {
-        out = out.concat(
-          this.data[variables[i]].map((v) => ({
-            ...v,
-            variable: this.metadata.aliases[variables[i]],
-          }))
-        );
-      }
-
-      let content = Papa.unparse(out);
-      let filename;
-      console.log(variables);
-      if (variables.length == 1)
-        filename = `progressphl_data_${this.selectedDownloadOption}.csv`;
-      else filename = "progressphl_data_all_variables.csv";
-
-      let contentType = "text/plain";
-      downloadFile(content, contentType, filename);
-
-      // Close popup
-      this.showDownloadPopup = false;
-    },
     goTo(page) {
       let path = `/${page}`;
       if (page === "scorecards" && this.showScorecardBadge) {
@@ -313,9 +234,17 @@ export default {
       }
       if (this.$route.path !== path) this.$router.push(path);
     },
+
+    /**
+     * Is the input page selected
+     */
     isSelected(page) {
       return this.$route.path.startsWith(`/${page}`);
     },
+
+    /**
+     * Go to external link
+     */
     externalLink(url) {
       window.open(url, "_blank").focus();
     },

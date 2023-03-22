@@ -9,7 +9,11 @@
     :style="getPaddingTop(controllerNavHeight)"
   >
     <!-- Navbar -->
-    <navbar :height="navBarHeight" />
+    <navbar
+      :height="navBarHeight"
+      :selected-geography-name="selectedGeographyName"
+      :selected-geography-type="selectedGeographyType"
+    />
 
     <!-- Main content -->
     <div
@@ -44,6 +48,13 @@ export default {
      * Extra classes for div wrapper
      */
     wrapperClass: { type: String, default: "" },
+
+    /**
+     * Is there a currently selected geography?
+     * Track both the name and type
+     */
+    selectedGeographyName: { type: String },
+    selectedGeographyType: { type: String },
   },
   components: { Navbar, LoadingPage },
   computed: {

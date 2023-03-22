@@ -20,7 +20,7 @@
 
     <!-- Change map variable -->
     <clickable-icon
-      v-if="selectedGeographyType == 'tract'"
+      v-if="selectedGeographyType == 'tract' && $mq !== 'mobile'"
       icon="fas fa-table"
       title="See data indicators"
       color-class="tw-text-gray-300"

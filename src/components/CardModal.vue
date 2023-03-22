@@ -6,8 +6,9 @@
       @click.self="close"
     >
       <div
-        class="tw-relative tw-max-h-[80vh] tw-w-full tw-overflow-y-scroll tw-rounded-lg tw-bg-white tw-p-8 tw-shadow-lg"
-        :class="widthClass"
+        class="tw-relative tw-max-h-[80vh] tw-w-full tw-rounded-lg tw-bg-white tw-p-8 tw-shadow-lg"
+        id="scrollableContainer"
+        :class="styleClasses"
       >
         <button
           aria-label="close"
@@ -30,9 +31,24 @@ export default {
       type: Boolean,
     },
 
+    useScroll: {
+      type: Boolean,
+      default: true,
+    },
+
     widthClass: {
       type: String,
       default: "tw-max-w-2xl",
+    },
+  },
+  data() {
+    return { scrollTop: null };
+  },
+  computed: {
+    styleClasses() {
+      let out = this.widthClass;
+      if (this.useScroll) out += " tw-overflow-y-scroll";
+      return out;
     },
   },
   watch: {

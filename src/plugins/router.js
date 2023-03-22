@@ -31,14 +31,4 @@ export default new Router({
       component: ScorecardComparison,
     },
   ],
-  scrollBehavior(to, from) {
-    if (to.path == from.path) return false;
-    if (to.path != from.path) return { x: 0, y: 0 };
-    if (to.query.tract && from.query.tract) return false;
-
-    if (to.hash) {
-      return { selector: to.hash };
-    }
-    return { x: 0, y: 0 };
-  },
 });

@@ -69,6 +69,7 @@
           )
         "
         class="tw-absolute tw-z-[8] tw-mt-1 tw-hidden tw-max-h-[300px] tw-w-full tw-overflow-scroll tw-rounded-b tw-border-b tw-border-l tw-border-r tw-border-gray-300 tw-bg-white tw-shadow-sm focus:tw-text-black"
+        style="overscroll-behavior: contain"
         @keydown="onMenuKeydown"
       >
         <!-- List item -->
@@ -239,6 +240,9 @@ export default {
       this.selectedMenuitem = null;
       this.selectedOptionLabel = null;
       this.$emit("input", null);
+
+      // Stop propagating
+      event.stopPropagation();
     },
     /*
       How to style the dropdown list items
@@ -364,6 +368,7 @@ export default {
     // Popup menu methods
 
     openPopup() {
+      this.$emit("open");
       this.$refs.buttonNode.setAttribute("aria-expanded", "true");
       this.$refs.menuNode.focus();
       this.setFocusToMenuitem(this.selectedMenuitem); // set to current selection
@@ -371,6 +376,7 @@ export default {
 
     closePopup() {
       if (this.isOpen()) {
+        this.$emit("close");
         this.$refs.buttonNode.removeAttribute("aria-expanded");
         this.$refs.menuNode.setAttribute("aria-activedescendant", "");
         this.$refs.buttonNode.focus();

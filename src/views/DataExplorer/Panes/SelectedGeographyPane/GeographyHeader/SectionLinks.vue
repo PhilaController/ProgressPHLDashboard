@@ -8,7 +8,7 @@
         @click.prevent="$emit('scroll', selectors[i])"
         @keydown.enter.prevent="$emit('scroll', selectors[i])"
         @keydown.space.prevent="$emit('scroll', selectors[i])"
-        class="tw-font-semibold tw-text-[#0F7582]/80 visited:tw-text-[#0F7582]/80 hover:tw-cursor-pointer hover:tw-text-[#0F7582] focus:tw-outline-none active:tw-text-[#0F7582]"
+        class="tw-font-semibold tw-text-[#0F7582]/80 visited:tw-text-[#0F7582]/80 hover:tw-cursor-pointer hover:tw-text-[#0F7582] focus:tw-text-[#0F7582] focus:tw-outline-none active:tw-text-[#0F7582]"
         >{{ title }}</a
       >
     </div>

@@ -66,9 +66,9 @@ footer {
   display: contents;
 }
 
-.grid-row-wrapper-3.last > .scorecard-cell:not(:first-child) {
+/* .grid-row-wrapper-3.last > .scorecard-cell:not(:first-child) {
   @apply tw-border-b tw-border-stone-300;
-}
+} */
 
 .scorecard-grid {
   @apply tw-grid tw-w-full tw-grid-cols-[min-content_2fr_1fr_min-content] tw-items-end tw-gap-x-0;

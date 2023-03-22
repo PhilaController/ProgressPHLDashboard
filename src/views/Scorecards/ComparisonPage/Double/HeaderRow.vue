@@ -4,12 +4,12 @@
       <!-- Name -->
       <div class="scorecard-cell"></div>
       <div
-        class="scorecard-cell tw-col-span-3 tw-items-end tw-justify-end tw-text-base tw-font-semibold tw-text-neutral-500"
+        class="scorecard-cell tw-col-span-3 tw-items-end tw-justify-end tw-text-right tw-text-base tw-font-semibold tw-text-neutral-500"
       >
         {{ tractNameFirst }}
       </div>
       <div
-        class="scorecard-cell tw-col-span-3 tw-items-end tw-justify-end tw-text-base tw-font-semibold tw-text-neutral-500"
+        class="scorecard-cell tw-col-span-3 tw-ml-8 tw-items-end tw-justify-end tw-text-right tw-text-base tw-font-semibold tw-text-neutral-500"
       >
         {{ tractNameSecond }}
       </div>

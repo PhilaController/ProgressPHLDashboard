@@ -1,6 +1,8 @@
 <template>
   <content-wrapper
     :is-loading="isLoading"
+    :selected-geography-name="selectedGeographyName"
+    :selected-geography-type="selectedGeographyType"
     wrapper-class="lg:tw-h-screen tw-text-lg"
     content-class="tw-flex-col lg:tw-flex-row"
   >
@@ -224,7 +226,6 @@ export default {
         // Add it
         let out = [...names];
         out.push(name);
-        console.log("HEY", out);
 
         // Save it
         this.$store.commit("setValue", {
@@ -323,3 +324,9 @@ export default {
   },
 };
 </script>
+
+<style>
+#content-container {
+  overscroll-behavior: contain;
+}
+</style>
